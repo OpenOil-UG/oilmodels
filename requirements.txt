@@ -5,3 +5,4 @@ django-jinja
 awscli
 boto
 ipython
+django-tables2

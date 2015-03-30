@@ -77,8 +77,11 @@ WSGI_APPLICATION = 'oilmodels.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'openoil',
+        'USER': 'openoil',
+        'PASSWORD': 'XXXXXXXXXXXXXXX',
+        #'HOST': '144.76.203.23',
     }
 }
 
