@@ -1,8 +1,22 @@
 # django settings file
-oilmodels/settings.py
+oilmodels/settings_private.py
 
-# vim swap files
+# swap files for vim,emacs,etc
 *~
+.DS_Store
+*~
+*#
+.#*
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -10,6 +24,8 @@ __pycache__/
 
 # C extensions
 *.so
+
+
 
 # Distribution / packaging
 bin/

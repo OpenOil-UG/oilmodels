@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
+from oilmodels.settings_private import DB_PASS
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
@@ -37,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_tables2',
     'modeling',
 )
 
@@ -64,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.request',
             ],
         },
     },
@@ -80,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'openoil',
         'USER': 'openoil',
-        'PASSWORD': 'XXXXXXXXXXXXXXX',
+        'PASSWORD': DB_PASS,
         #'HOST': '144.76.203.23',
     }
 }
