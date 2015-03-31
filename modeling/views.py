@@ -11,3 +11,7 @@ def infotypes(request):
 @login_required()
 def datasources(request):
     return render(request, "datatypes.html", {"tabledata": models.DataSource.objects.all()})
+
+@login_required()
+def reserve(request):
+    return render(request, "datatypes.html", {"tabledata": models.Reserve.objects.all()})
