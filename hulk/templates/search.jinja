@@ -1,0 +1,16 @@
+{% extends "base.jinja" %}
+{% block content %}
+{% for r in results %}
+<table class="searchresults">
+  <tbody>
+<!--<tr><th>Label</th><th>Value</th></tr>-->
+ {% for (sourcename,label) in keys %}
+<tr><td class="searchleft">{{ label }} </td>
+<td class="searchright">{{ r.metadata[sourcename]|prettyprint(sourcename)|safe }}</td>
+</tr>
+  {% endfor %}
+<tr><td></td><td><a href="/admin/hulk/searchresult/{{r.id}}">Edit/view all information</a></td></tr>
+</tbody>
+</table>
+{% endfor %}
+{% endblock %}
