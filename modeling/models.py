@@ -32,4 +32,36 @@ class InformationType(models.Model):
     def __str__(self):
         return self.name
 
+class Country(models.Model):
+    iso2 = models.CharField(max_length=2, pk=True)
+    name = models.CharField(max_length=75)
+    
+class Reserve(models.Model):
+    # convert all reserves to million barrels BEFORE importing
+    p1 = models.FloatField(blank=True,null=True)
+    p2 = models.FloatField(blank=True,null=True)
+    p3 = models.FloatField(blank=True,null=True)
 
+    year = models.IntegerField(blank=True,null=True, min=1900, max=2100)
+
+    field_name = models.CharField(max_length=200, blank=True,null=True)
+    project_name = models.CharField(max_length=200, blank=True,null=True)
+    company_name = models.CharField(max_length=200, blank=True,null=True)
+    company_name = models.CharField(max_length=200, blank=True,null=True)
+
+    reporting_level = models.CharField(max_length=100,
+                                       choices = (
+                                           ('field', 'Field'),
+                                           ('project', 'Project'),
+                                           ('company-country', 'Company (in one country)'),
+                                           ('company', 'Company (global)'),
+                                           ('country', 'Country (all companies'))
+                                       )
+    
+    country = models.ForeignKey('Country', blank=True, null=True)
+
+    #source = models.ForeignKey('Source')
+
+    
+
+    
