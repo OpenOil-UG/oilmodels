@@ -33,7 +33,7 @@ class InformationType(models.Model):
         return self.name
 
 class Country(models.Model):
-    iso2 = models.CharField(max_length=2, pk=True)
+    iso2 = models.CharField(max_length=2, primary_key=True)
     name = models.CharField(max_length=75)
     
 class Reserve(models.Model):
@@ -42,7 +42,7 @@ class Reserve(models.Model):
     p2 = models.FloatField(blank=True,null=True)
     p3 = models.FloatField(blank=True,null=True)
 
-    year = models.IntegerField(blank=True,null=True, min=1900, max=2100)
+    year = models.IntegerField(blank=True,null=True)
 
     field_name = models.CharField(max_length=200, blank=True,null=True)
     project_name = models.CharField(max_length=200, blank=True,null=True)
