@@ -1,5 +1,6 @@
 from django_pg import models
 from django.contrib.postgres.fields import DateRangeField
+from django_countries.fields import CountryField
 
 # Create your models here.
 
@@ -32,9 +33,6 @@ class InformationType(models.Model):
     def __str__(self):
         return self.name
 
-class Country(models.Model):
-    iso2 = models.CharField(max_length=2, primary_key=True)
-    name = models.CharField(max_length=75)
     
 class Reserve(models.Model):
     # convert all reserves to million barrels BEFORE importing
@@ -57,8 +55,8 @@ class Reserve(models.Model):
                                            ('company', 'Company (global)'),
                                            ('country', 'Country (all companies'))
                                        )
-    
-    country = models.ForeignKey('Country', blank=True, null=True)
+
+    country = CountryField(blank=True,null=True)
 
     #source = models.ForeignKey('Source')
 
