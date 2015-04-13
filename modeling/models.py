@@ -70,17 +70,21 @@ class Reserve(models.Model):
     #p2 = models.FloatField(blank=True,null=True)
     #p3 = models.FloatField(blank=True,null=True)
 
-    year = models.IntegerField(blank=True,null=True)
-
     project = models.ForeignKey(Project, blank=True, null=True)
     company = models.ForeignKey(Company, blank=True, null=True)
+    year = models.IntegerField(blank=True,null=True)
+    country = CountryField(blank=True,null=True)
+    commodity = models.CharField(max_length=100, choices = (
+        ('gas', 'Gas'),
+        ('oil', 'Oil, grade unspecified'),
+        ('oil', 'Oil, heavy'),
+        ('oil', 'Oil, light and medium'),
+        ))        
     source_document = models.ForeignKey(Document, blank=True, null=True)
-
-    company_name = models.CharField(max_length=200, blank=True,null=True)
-    company_name = models.CharField(max_length=200, blank=True,null=True)
 
     reporting_level = models.CharField(max_length=100,
                                        choices = (
+                                           ('well', 'Well'),
                                            ('field', 'Field'),
                                            ('project', 'Project'),
                                            ('company-country', 'Company (in one country)'),
@@ -88,7 +92,7 @@ class Reserve(models.Model):
                                            ('country', 'Country (all companies'))
                                        )
 
-    country = CountryField(blank=True,null=True)
+
 
     def __str__(self):
         if self.project and self.project.name:

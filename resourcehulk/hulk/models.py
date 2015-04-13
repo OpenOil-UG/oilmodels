@@ -1,5 +1,6 @@
 from django_pg import models
 from datetime import datetime
+from django_countries.fields import CountryField
 import uuid
 
 def random_id(*args, **kwargs):
@@ -142,9 +143,17 @@ class Document(models.Model):
         return self.host_url or '<untitled>'
 
 class Project(models.Model):
-    project_id = models.CharField(primary_key=True, max_length=200, default=random_id)
+    project_id = models.CharField(primary_key=True, max_length=200, default=random_id)    
     project_name = models.CharField(max_length=200,null=True,blank=True)
-    country = models.CharField(max_length=200,null=True,blank=True)
+    type = models.CharField(max_length=100,
+                                       choices = (
+                                           ('well', 'Well'),
+                                           ('field', 'Field'),
+                                           ('project', 'Project'),
+                                           ('company-country', 'Company (all operations in one country)'),
+                                       ))
+
+    country = CountryField(blank=True,null=True)
     source = models.ForeignKey('SourceInfo', null=True,blank=True)
 
     class Meta:
