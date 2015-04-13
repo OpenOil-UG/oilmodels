@@ -2,7 +2,7 @@ Django
 psycopg2
 -e git://github.com/lukesneeringer/django-pgfields.git#egg=django-pgfields
 django-jinja
-canopener
+-e git://github.com/danohuiginn/canopener.git#egg=canopener
 awscli
 boto
 ipython

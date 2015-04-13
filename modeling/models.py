@@ -1,6 +1,9 @@
 from django_pg import models
 from django.contrib.postgres.fields import DateRangeField
 from django_countries.fields import CountryField
+from django.contrib.auth.models import User
+
+from hulk.models import Document, Company, Project
 
 # Create your models here.
 
@@ -33,17 +36,46 @@ class InformationType(models.Model):
     def __str__(self):
         return self.name
 
+
+class ReserveLevel(models.Model):
+    # XXX Nameme!
+    category = models.CharField(
+        max_length=20,
+        choices = ((x,x) for x in [
+            'Unknown',
+            '1P',
+            '2P',
+            '3P',
+            '1C',
+            '2C',
+            '3C',
+            ]),
+        default='Unknown',
+        )
+    level = models.FloatField()
+    unit = models.CharField(
+        max_length=20,
+        choices = (
+            ('mbbls', 'Million barels'),
+            ('mmcf', 'Million cubic feet'),
+            ('mboe', 'Million barels oil equivalent'),
+            ),
+        default = 'mbbls')
+    reserve = models.ForeignKey('Reserve', related_name='reserve_levels')
+
     
 class Reserve(models.Model):
     # convert all reserves to million barrels BEFORE importing
-    p1 = models.FloatField(blank=True,null=True)
-    p2 = models.FloatField(blank=True,null=True)
-    p3 = models.FloatField(blank=True,null=True)
+    #p1 = models.FloatField(blank=True,null=True)
+    #p2 = models.FloatField(blank=True,null=True)
+    #p3 = models.FloatField(blank=True,null=True)
 
     year = models.IntegerField(blank=True,null=True)
 
-    field_name = models.CharField(max_length=200, blank=True,null=True)
-    project_name = models.CharField(max_length=200, blank=True,null=True)
+    project = models.ForeignKey(Project, blank=True, null=True)
+    company = models.ForeignKey(Company, blank=True, null=True)
+    source_document = models.ForeignKey(Document, blank=True, null=True)
+
     company_name = models.CharField(max_length=200, blank=True,null=True)
     company_name = models.CharField(max_length=200, blank=True,null=True)
 
@@ -58,8 +90,31 @@ class Reserve(models.Model):
 
     country = CountryField(blank=True,null=True)
 
+    def __str__(self):
+        if self.project and self.project.name:
+            return '%s: %s estimate' % (self.project.name, self.year)
+        else:
+            return 'unnamed'
+
+
     #source = models.ForeignKey('Source')
 
-    
+class Task(models.Model):
+    source = models.ForeignKey(Document)
+    status = models.CharField(max_length=12,
+                              choices=[
+                                  (x,x) for x in (
+                                      'completed',
+                                      'in progress',
+                                      'available',
+                                      'on hold')
+                                  ])
+    task_group = models.ForeignKey('TaskGroup')
+    date_completed = models.DateTimeField(null=True,blank=True)
+    user = models.ForeignKey(User)
+    data = models.JSONField(null=True,blank=True)
 
+class TaskGroup(models.Model):
+    description = models.CharField
+    data = models.JSONField(null=True,blank=True)
     

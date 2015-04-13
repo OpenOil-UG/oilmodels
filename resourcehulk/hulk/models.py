@@ -128,15 +128,6 @@ class Contract(models.Model):
     def __str__(self):
         return self.contract_id or '<untitled>'
 
-class DjangoMigrations(models.Model):
-    id = models.IntegerField(primary_key=True)  # AutoField?
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
-
-    class Meta:
-        db_table = 'django_migrations'
-
 
 class Document(models.Model):
     doc_id = models.CharField(primary_key=True, max_length=200, default=random_id)

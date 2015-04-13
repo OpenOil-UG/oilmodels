@@ -56,8 +56,8 @@ class Command(BaseCommand):
                     'filing_type',
                     ):
                 jline[label] = parts[label]
-        comp = models.Company.objects.get(cik=jline['cik'])
-        jline['company_name'] = comp.company_name
+            comp = models.Company.objects.get(cik=jline['cik'])
+            jline['company_name'] = comp.company_name
         return jline
 
     def handle(self, path, **kwargs):
