@@ -16,6 +16,9 @@ class SourceInfo(models.Model):
     date = models.DateTimeField(default=datetime.now)
     info = models.JSONField(type=dict, default={})
 
+    def __str__(self):
+        return '%s under %s license' % (self.contributor, self.license)
+
 class Search(models.Model):
     '''
     Represents one run of any of the data-searching code
@@ -80,6 +83,7 @@ class Company(models.Model):
 
     class Meta:
         db_table = 'company_table'
+        ordering = ['company_name',]
 
     def __str__(self):
         return self.company_name or '<untitled>'

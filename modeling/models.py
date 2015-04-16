@@ -52,12 +52,22 @@ class ReserveLevel(models.Model):
             ]),
         default='Unknown',
         )
+    status = models.CharField(
+        max_length=20,
+        choices = (
+            ('developed', 'Developed'),
+            ('undeveloped', 'Undeveloped'),
+            ('total', 'Total'),
+            ('unspecified', 'Unspecified'),
+            ),
+        default = 'unspecified')
+
     level = models.FloatField()
     unit = models.CharField(
         max_length=20,
         choices = (
             ('mbbls', 'Million barels'),
-            ('mmcf', 'Million cubic feet'),
+            ('mmcf', 'Million cubic feet (mmcf/mmscf)'),
             ('mboe', 'Million barels oil equivalent'),
             ),
         default = 'mbbls')
@@ -72,14 +82,16 @@ class Reserve(models.Model):
 
     project = models.ForeignKey(Project, blank=True, null=True)
     company = models.ForeignKey(Company, blank=True, null=True)
-    year = models.IntegerField(blank=True,null=True)
+    year = models.IntegerField(blank=True,null=True,
+                               help_text = "year statement applies to, if specified, otherwise publication year of the source document")
     country = CountryField(blank=True,null=True)
     commodity = models.CharField(max_length=100, choices = (
         ('gas', 'Gas'),
         ('oil', 'Oil, grade unspecified'),
         ('oil', 'Oil, heavy'),
         ('oil', 'Oil, light and medium'),
-        ))        
+        ))
+    interest = models.FloatField(default=100, verbose_name = "Interest of the company in this project (%)")
     source_document = models.ForeignKey(Document, blank=True, null=True)
 
     reporting_level = models.CharField(max_length=100,
@@ -95,8 +107,8 @@ class Reserve(models.Model):
 
 
     def __str__(self):
-        if self.project and self.project.name:
-            return '%s: %s estimate' % (self.project.name, self.year)
+        if self.project and self.project.project_name:
+            return '%s: %s estimate' % (self.project.project_name, self.year)
         else:
             return 'unnamed'
 
