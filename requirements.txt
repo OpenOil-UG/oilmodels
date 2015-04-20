@@ -7,3 +7,4 @@ awscli
 boto
 ipython
 django-tables2
+django-date-extensions

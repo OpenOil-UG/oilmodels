@@ -6,6 +6,47 @@ import uuid
 def random_id(*args, **kwargs):
     return uuid.uuid4().hex
 
+class Project(models.Model):
+    project_id = models.CharField(primary_key=True, max_length=200, default=random_id)    
+    project_name = models.CharField(max_length=200,null=True,blank=True)
+    type = models.CharField(max_length=100,
+                                       choices = (
+                                           ('well', 'Well'),
+                                           ('field', 'Field'),
+                                           ('project', 'Project'),
+                                           ('company-country', 'Company (all operations in one country)'),
+                                       ))
+
+    country = CountryField(blank=True,null=True)
+    source = models.ForeignKey('SourceInfo', null=True,blank=True)
+    parent = models.ForeignKey('Project', null=True, blank=True, related_name="subprojects")
+
+    class Meta:
+        db_table = 'project_table'
+
+
+    def __str__(self):
+        return self.project_name or '<untitled>'
+
+class Company(models.Model):
+    company_id = models.CharField(primary_key=True, max_length=200, default=random_id)
+    company_name = models.CharField(max_length=200)
+    
+    cik = models.IntegerField(blank=True, null=True, db_index=True)
+    sic = models.IntegerField(blank=True, null=True)
+    jurisdiction = models.CharField(max_length=50, blank=True)
+
+    source=models.ForeignKey('SourceInfo', blank=True,null=True, related_name='companies')
+
+    class Meta:
+        db_table = 'company_table'
+        ordering = ['company_name',]
+
+    def __str__(self):
+        return self.company_name or '<untitled>'
+
+
+
 class SourceInfo(models.Model):
     '''
     Contains source information
@@ -41,52 +82,7 @@ class SearchResult(models.Model):
         return self.metadata.get('extract', str(self.sequencenum))
 
 
-class Commodity(models.Model):
-    commodity_id = models.CharField(primary_key=True, max_length=200, default=random_id)
-    commodity_name = models.CharField(max_length=200)
 
-    class Meta:
-        db_table = 'commodity_table'
-
-    def __str__(self):
-        return self.commodity_name or '<untitled>'
-
-
-class CompanyAlias(models.Model):
-    company_alias = models.CharField(primary_key=True, max_length=200, default=random_id)
-    company_id = models.CharField(max_length=200)
-
-    class Meta:
-        db_table = 'company_alias_table'
-
-    def __str__(self):
-        return self.company_alias or '<untitled>'
-
-
-
-class Company(models.Model):
-    company_id = models.CharField(primary_key=True, max_length=200, default=random_id)
-    open_lei_id = models.CharField(max_length=200, blank=True)
-    duns_number = models.CharField(max_length=200, blank=True)
-    company_name = models.CharField(max_length=200)
-    ticker_symbol = models.CharField(max_length=200, blank=True)
-    tax_id = models.CharField(max_length=200, blank=True)
-    open_corp_id = models.CharField(max_length=200, blank=True)
-    vat_id = models.CharField(max_length=200, blank=True)
-    company_url = models.CharField(max_length=200, blank=True)
-    
-    cik = models.IntegerField(blank=True, null=True, db_index=True)
-    sic = models.IntegerField(blank=True, null=True)
-    jurisdiction = models.CharField(max_length=50, blank=True)
-
-    source=models.ForeignKey('SourceInfo', blank=True,null=True, related_name='companies')
-
-    class Meta:
-        db_table = 'company_table'
-        ordering = ['company_name',]
-
-    def __str__(self):
-        return self.company_name or '<untitled>'
 
 
 class ConcessionAlias(models.Model):
@@ -146,27 +142,6 @@ class Document(models.Model):
     def __str__(self):
         return self.host_url or '<untitled>'
 
-class Project(models.Model):
-    project_id = models.CharField(primary_key=True, max_length=200, default=random_id)    
-    project_name = models.CharField(max_length=200,null=True,blank=True)
-    type = models.CharField(max_length=100,
-                                       choices = (
-                                           ('well', 'Well'),
-                                           ('field', 'Field'),
-                                           ('project', 'Project'),
-                                           ('company-country', 'Company (all operations in one country)'),
-                                       ))
-
-    country = CountryField(blank=True,null=True)
-    source = models.ForeignKey('SourceInfo', null=True,blank=True)
-
-    class Meta:
-        db_table = 'project_table'
-
-
-    def __str__(self):
-        return self.project_name or '<untitled>'
-
 
 class Statement(models.Model):
     statement_id = models.CharField(primary_key=True, max_length=200, default=random_id)
@@ -189,3 +164,29 @@ class Statement(models.Model):
 
     def __str__(self):
         return self.statement_content or '<untitled>'
+
+
+
+
+'''
+class Commodity(models.Model):
+    commodity_id = models.CharField(primary_key=True, max_length=200, default=random_id)
+    commodity_name = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'commodity_table'
+
+    def __str__(self):
+        return self.commodity_name or '<untitled>'
+
+
+class CompanyAlias(models.Model):
+    company_alias = models.CharField(primary_key=True, max_length=200, default=random_id)
+    company_id = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'company_alias_table'
+
+    def __str__(self):
+        return self.company_alias or '<untitled>'
+'''

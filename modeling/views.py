@@ -13,5 +13,10 @@ def datasources(request):
     return render(request, "datatypes.html", {"tabledata": models.DataSource.objects.all()})
 
 @login_required()
-def reserve(request):
+def reserves(request):
     return render(request, "datatypes.html", {"tabledata": models.Reserve.objects.all()})
+
+@login_required()
+def production(request):
+    return render(request, "datatypes.html", {"tabledata": models.Production.objects.all()})
+
