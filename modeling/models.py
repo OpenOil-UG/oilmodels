@@ -4,6 +4,10 @@ from django_countries.fields import CountryField
 from django.contrib.auth.models import User
 from django_date_extensions.fields import ApproximateDateField
 from hulk.models import Document, Company, Project
+import moneyed
+
+
+
 
 COMMODITIES = (
         ('gas', 'Gas'),
@@ -50,6 +54,9 @@ TIME_PERIODS = (
     ('month', 'month'),
     ('year', 'year'))
 
+CURRENCIES = sorted((k, v.name) for k,v in moneyed.CURRENCIES.items())
+
+
 class DataSource(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True,null=True)
@@ -79,7 +86,23 @@ class InformationType(models.Model):
     def __str__(self):
         return self.name
 
-
+class Cost(models.Model):
+    project = models.ForeignKey(Project)
+    # XXX does a key to Company make sense here??
+    actual_predicted = models.CharField(max_length=10,
+                                        choices=(
+                                            ('actual', 'Actual'),
+                                            ('predicted', 'Predicted'),))    
+    description = models.CharField(max_length=100, null=True,blank=True)
+    amount = models.FloatField()
+    currency = models.CharField(max_length=3,
+                                blank=True,
+                                null=True,
+                                default='USD',
+                                choices=CURRENCIES)
+    per = models.CharField(
+        max_length=30,
+        choices=TIME_PERIODS + (('barrel', 'barrel'),))
     
 class Reserve(models.Model):
 
