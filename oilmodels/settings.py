@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django_tables2',
     'modeling',
     'hulk',
+    'ooapi',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,6 +60,13 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'oilmodels.urls'
 
 TEMPLATES = [
+    {
+        "BACKEND": "django_jinja.backend.Jinja2",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "match_extension": ".jinja",
+        }
+    },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],

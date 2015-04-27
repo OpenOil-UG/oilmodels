@@ -1,6 +1,7 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 import modeling.urls
+import hulk.urls
 
 urlpatterns = [
     # Examples:
@@ -9,6 +10,7 @@ urlpatterns = [
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^data/', include(modeling.urls)),
+    url(r'^hulk/', include(hulk.urls)),    
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'admin/login.html'},name="login"),
 
 ]

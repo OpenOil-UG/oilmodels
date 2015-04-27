@@ -34,7 +34,8 @@ FIELD_STATUSES = (
             )
 
 UNITS = (
-    ('mbbls', 'Million barels'),
+    ('bbls', 'Barrels'),
+    ('mbbls', 'Million barrels'),
     ('mmcf', 'Million cubic feet (mmcf/mmscf)'),
     ('mboe', 'Million barels oil equivalent'),
     ('tdf', 'Thousand Cubic Feet (mcf/mscf)'),
@@ -137,6 +138,13 @@ class Reserve(models.Model):
             return 'unnamed'
 
 class Production(models.Model):
+
+    def __str__(self):
+        if all((self.project, self.company, self.date)):
+            return '%s in %s (%s)' % (self.project, self.date, self.company)
+        else:
+            return 'Production'
+    
     project = models.ForeignKey(Project, blank=True, null=True)
     company = models.ForeignKey(Company, blank=True, null=True)
     date = ApproximateDateField(blank=True,null=True)

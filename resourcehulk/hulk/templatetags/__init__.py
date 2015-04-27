@@ -1,6 +1,7 @@
 from django_jinja import library
 import jinja2
 import re
+import six
 
 def as_table(content):
     template = jinja2.Template(
@@ -39,7 +40,7 @@ def prettyprint(content, label):
         return ', '.join(str(x).capitalize() for x in content)
     elif isinstance(content, dict):
         return as_table(content)
-    elif isinstance(content, (str,unicode)):
+    elif isinstance(content, six.string_types):
         if content.startswith('http'):
             return as_link(content)
         elif content.startswith('s3://'):
