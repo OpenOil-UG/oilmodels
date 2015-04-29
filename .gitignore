@@ -1,6 +1,9 @@
 # django settings file
 oilmodels/settings_private.py
 
+# data
+ooapi/data/*
+
 # swap files for vim,emacs,etc
 *~
 .DS_Store
