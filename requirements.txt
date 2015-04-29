@@ -10,3 +10,4 @@ django-tables2
 django-date-extensions
 py-moneyed
 django-money
+pycountry

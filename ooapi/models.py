@@ -17,10 +17,12 @@ class Concession(models.Model):
         ))
     source_document = models.CharField(max_length=300,
                                        null=True, blank=True) #url
+    source_date = models.DateField(null=True,blank=True)
+    retrieved_date = models.DateField(null=True,blank=True)
     further_info = models.TextField(null=True, blank=True)
     licensees = models.TextField(null=True,blank=True) # makes Baby Jesus cry
     
-    
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.country)
 
     
-                              
