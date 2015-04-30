@@ -6,7 +6,19 @@ from datetime import datetime
 
 def get_country_code(fname):
     # '/path/to/Concessions_Zambia_17122014.csv' --> 'ZM'
+
+
+    awkward_countries = {
+        'Vietnam': 'VN',
+        'South Korea': 'KR',
+        'Falkland Isalnds': 'FK',
+        'Democratic Republic of Cogo': 'CD',
+        'Tanzania': 'TZ',
+        'Ivory Coast': 'CI',
+        }
     country_name = re.search('Concessions_(.*?)_', fname).group(1)
+    if country_name in awkward_countries:
+        return awkward_countries[country_name]
     country = pycountry.countries.get(name=country_name)
     return country.alpha2
 
@@ -56,6 +68,8 @@ def concession_from_csv(fname):
             retrieved_date = retrieved_date,
             licensees = row['ConcessionContractor'],
             further_info = row['ConcessionDescription'],
+            type = get_type(row['ConcessionDescription']),
+            status = get_status(row['ConcessionDescription']),
             )
         c.save()
 

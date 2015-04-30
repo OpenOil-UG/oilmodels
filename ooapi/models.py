@@ -21,7 +21,21 @@ class Concession(models.Model):
     retrieved_date = models.DateField(null=True,blank=True)
     further_info = models.TextField(null=True, blank=True)
     licensees = models.TextField(null=True,blank=True) # makes Baby Jesus cry
-    
+
+    def infodict(self):
+        # basic info ready for json
+        data = {}
+        for field in (
+                'name', 'type', 'status',
+                'source_document', 'source_date',
+                'retrieved_date', 'licensees',
+                'further_info'
+        ):
+            data[field] = getattr(self, field) or ""
+        data['country'] = self.country.code
+        return data
+
+        
     def __str__(self):
         return "%s (%s)" % (self.name, self.country)
 

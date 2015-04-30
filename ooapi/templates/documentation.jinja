@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script> src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+
+<h1>OpenOil API</h1>
+
+<h2> Features common to all requests </h2>
+
+The <b>root url</b> is <b>http://api.openoil.net/</b>. You can optionally specify a version number in the URL -- <b>http://api.openoil.net/v0.1</b>. Requests which do not specify a version number will be redirected to the latest version.
+
+You can control paging in any request:
+<ul>
+  <li><b>page</b>: page number of results to show. First page is 1</li>
+  <li><b>per_page</b>: number of results to fetch</li>
+</ul>
+
+
+<h2>Concessions</h2>
+
+You can find a description of this dataset <a href="http://repository.openoil.net/wiki/Concession_Layer_Methodology">here</a>
+
+To get data on all concessions, send a request to:
+
+<blockquote>
+<code>
+http://api.openoil.net/v0.1/concessions
+</code>
+</blockquote>
+
+Which results in
+<blockquote>
+      <pre>
+
+  <code>
+{
+    "api_version": 0.1,
+    "page": 1,
+    "per_page": 100,
+    "result_count": 18038,
+    "results": [
+        {
+            "country": "NZ",
+            "further_info": "Release Area: 15GSC-R1, Block Offer Year: 2015",
+            "licensees": "",
+            "name": "169E49/6",
+            "retrieved_date": "2015-02-11",
+            "source_date": "",
+            "source_document": "http://data.nzpam.govt.nz/permitwebmaps?commodity=petroleum",
+            "status": "",
+            "type": ""
+        },
+        {
+            "country": "NZ",
+            "further_info": "Release Area: 15GSC-R1, Block Offer Year: 2015",
+            "licensees": "",
+            "name": "169E49/7",
+            "retrieved_date": "2015-02-11",
+            "source_date": "",
+            "source_document": "http://data.nzpam.govt.nz/permitwebmaps?commodity=petroleum",
+            "status": "",
+            "type": ""
+        },
+......]}
+
+</code>
+</pre>
+</blockquote>
+
+
+You can limit the results by any of:
+
+<ul>
+  <li><b>country</b>: 2-letter country code</li>
+  <li><b>type</b>: one of <i>offshore, onshore</i></li>
+  <li><b>status</b>: one of <i>licensed, unlicensed</i></li>
+</ul>
+
+For example, you can find all licensed concession areas in Australia with:
+
+<blockquote><code>
+    http://144.76.203.23:8000/api/concessions?status=licensed&country=AU
+</code></blockquote>
+
+Which results in:
+
+<blockquote>
+<pre>
+  <code>
+{
+    "api_version": 0.1, 
+    "page": 1, 
+    "per_page": 100, 
+    "result_count": 8408, 
+    "results": [
+        {
+            "country": "AU", 
+            "further_info": "Title Number: WA-420-P, Title Type: Exploration Permit, Status: Active, Offshore Area: Western Australia, Basin: Bonaparte Basin", 
+            "licensees": "Goldsborough Energy Pty Ltd", 
+            "name": "1", 
+            "retrieved_date": "2014-08-12", 
+            "source_date": "2014-01-12", 
+            "source_document": "http://www.nopta.gov.au/_documents/neats/blocks-report-20141201.xlsx", 
+            "status": "licensed", 
+            "type": ""
+        }, 
+        {
+            "country": "AU", 
+            "further_info": "Title Number: WA-466-P, Title Type: Exploration Permit, Status: Active, Offshore Area: Western Australia, Basin: Roebuck Basin", 
+            "licensees": "Woodside Energy Ltd.", 
+            "name": "1", 
+            "retrieved_date": "2014-08-12", 
+            "source_date": "2014-01-12", 
+            "source_document": "http://www.nopta.gov.au/_documents/neats/blocks-report-20141201.xlsx", 
+            "status": "licensed", 
+            "type": ""
+},
+......
+}]
+</code>
+</pre>
+</blockquote>
+
+
+
+
+<h2>Data Sources</h2>
+
+The data, and its sources, <a href="http://repository.openoil.net/wiki/Concession_Layer_Methodology">are described in detail on the OpenOil wiki</a>.
+
+
+</body></html>
