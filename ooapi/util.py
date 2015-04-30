@@ -3,6 +3,40 @@ import csv
 import pycountry
 import re
 from datetime import datetime
+import requests
+import traceback
+
+APIKEY = 'VGm1FGzG9d6pZVqAxaQW10SVi9aaW6YJkPREI116aJA='
+
+
+def query_bing(query):
+    url = 'https://api.datamarket.azure.com/Bing/Search/Web'
+    params = {
+        'Query': "'%s'" % query,
+        '$format': 'json',}
+    auth = (APIKEY, APIKEY)
+    result = requests.get(url, params=params, auth = auth)
+    try:
+        return result.json()['d']['results']
+    except exception:
+        print('bad result for query %s % query')
+        traceback.print_exc()
+        return []
+
+def searchterm_for_conc(conc):
+    return '"%s" "%s"' % (conc.name, conc.country.name)
+    
+def bing_concession(conc):
+    searchterm = searchterm_for_conc(conc)
+    for result in query_bing(searchterm):
+        r = models.ConcessionSearchResult(
+            concession = conc,
+            source = 'bing',
+            url = result['Url'],
+            title = result['Title'],
+            description= result['Description'],
+        )
+        r.save()
 
 def get_country_code(fname):
     # '/path/to/Concessions_Zambia_17122014.csv' --> 'ZM'

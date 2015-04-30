@@ -1,5 +1,6 @@
 from django.contrib import admin
-from ooapi.models import Concession
+from ooapi.models import Concession, ConcessionSearchResult
 
 # Register your models here.
-admin.site.register(Concession)
+for table in (Concession, ConcessionSearchResult):
+    admin.site.register(table)
