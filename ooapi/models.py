@@ -1,6 +1,20 @@
 from django.db import models
 from django_countries.fields import CountryField
+from datetime import datetime
 # Create your models here.
+
+class ConcessionSearchResult(models.Model):
+    concession = models.ForeignKey('Concession')
+    source = models.CharField(
+        choices = (('bing', 'Bing'),),
+        max_length=20)
+    date_scraped = models.DateField(default=datetime.now)
+    reviewed = models.BooleanField(default=False)
+    blacklisted = models.BooleanField(default=False)
+    url = models.URLField()
+    title = models.CharField(max_length=200)
+    priority = models.IntegerField(default=0)
+    description = models.TextField(null=True,blank=True)
 
 class Concession(models.Model):
     name = models.CharField(max_length=200)
