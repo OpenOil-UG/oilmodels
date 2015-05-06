@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
-from oilmodels.settings_private import DB_PASS
+from oilmodels.settings_private import DB_PASS, ALCHEMY_API_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -118,3 +118,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+#
+OOAPI_CONCESSIONS_DL_DIR='/data/concessions/'
