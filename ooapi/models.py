@@ -1,5 +1,6 @@
 from django.db import models
 from django_countries.fields import CountryField
+from django.contrib.postgres.fields import HStoreField
 from datetime import datetime
 from ooapi import datextract
 # set
@@ -74,6 +75,7 @@ class Concession(models.Model):
     source_date = models.DateField(null=True,blank=True)
     retrieved_date = models.DateField(null=True,blank=True)
     further_info = models.TextField(null=True, blank=True)
+    details = HStoreField(null=True,blank=True)
     licensees = models.TextField(null=True,blank=True) # makes Baby Jesus cry
 
     def infodict(self):

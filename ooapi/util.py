@@ -2,9 +2,12 @@ from ooapi import models
 import csv
 import pycountry
 import re
+from collections import Counter, defaultdict
 from datetime import datetime
 import requests
 import traceback
+import csv
+import sys
 
 APIKEY = 'VGm1FGzG9d6pZVqAxaQW10SVi9aaW6YJkPREI116aJA='
 
@@ -107,3 +110,53 @@ def concession_from_csv(fname):
             )
         c.save()
 
+
+def fix_furtherinfo():
+    # break down the
+    # from: u'Operador:Petra Energia, Concession\xe1rios:*Petra Energia - 100%, Contrato:BT-SF-3, Vencimento1\xba:12.03.2010, Observacao:EM AN\xc1LIS
+    # to: {u'Concession\xe1rios': u'*Petra Energia - 100%',
+    #   u'Contrato': u'BT-SF-3',
+    #   u'Observacao': u'EM AN\xc1LISE',
+    #   u'Operador': u'Petra Energia',
+    #   u'Vencimento1\xba': u'12.03.2010'}
+
+    for row in models.Concession.objects.all():
+        d = {}
+        parts = reversed([x.strip() for x in row.further_info.split(',')])
+        remainder = u''
+        for part in parts:
+            if ':' in part:
+                k,v = part.split(':', 1)
+                d[k] = (v + remainder).strip()
+                remainder = u''
+            else: #this is something we got from not escaping commas
+                remainder = remainder +', ' + part
+        row.details = d
+        row.save()
+
+def keycounts():
+    # stats on the keys found in the details field
+    d = Counter()
+    countries = defaultdict(set)
+    for row in models.Concession.objects.all():
+        for k in row.details.keys():
+            d[k] += 1
+            countries[k].add(row.country.code)
+    for(label,count) in d.most_common(100):
+        print(label,count,', '.join(countries[label]))
+    return d
+
+def valuecounts(field):
+    #we want a count of every value in the field, plus the
+    countries = defaultdict(set)
+    counts = Counter()
+    for row in models.Concession.objects.all():
+        value = row.details.get(field,None)
+        if not value:
+            continue
+        value = value.strip().lower()
+        counts[value] +=1
+        countries[value].add(row.country.code)
+    w = csv.writer(open('/tmp/concessionvalues_%s.csv' % field.lower(),'w'))
+    for (label, count) in counts.most_common():
+        w.writerow([label, count, ', '.join(countries[label])])

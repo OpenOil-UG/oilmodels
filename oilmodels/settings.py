@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.postgres',
     'django.contrib.staticfiles',
     'django_countries',
     'django_tables2',
@@ -95,7 +96,7 @@ DATABASES = {
         'NAME': 'openoil',
         'USER': 'openoil',
         'PASSWORD': DB_PASS,
-        #'HOST': '144.76.203.23',
+        'HOST': 'localhost',
     }
 }
 
@@ -120,5 +121,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-#
+
 OOAPI_CONCESSIONS_DL_DIR='/data/concessions/'
+
