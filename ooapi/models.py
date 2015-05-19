@@ -1,13 +1,12 @@
 from django.db import models
 from django_countries.fields import CountryField
-from django.contrib.postgres.fields import HStoreField
+from django.contrib.postgres.fields import HStoreField, ArrayField
 from datetime import datetime
 from ooapi import datextract
-# set
 
 from django.conf import settings
 
-import os
+import os, string,random
 from six.moves.urllib import request
 BASEDIR='/tmp/concession_search_pages'
 
@@ -55,7 +54,13 @@ class ConcessionSearchResult(models.Model):
         if (overwrite is False) and self.date_original:
             return
         self.date = datextract.date_from_html(self.cached_page())
+
+def new_key():
+    return 'oo_' + ''.join(random.choice(string.lowercase+string.digits) for x in range(17))
         
+class APIKey(models.Model):
+    key = models.CharField(unique=True, max_length=25, default=new_key)
+    email = models.EmailField(unique=True)
 
 class Concession(models.Model):
     name = models.CharField(max_length=200)
@@ -74,7 +79,7 @@ class Concession(models.Model):
                                        null=True, blank=True) #url
     source_date = models.DateField(null=True,blank=True)
     retrieved_date = models.DateField(null=True,blank=True)
-    further_info = models.TextField(null=True, blank=True)
+    further_info = models.TextField(null=True, blank=True) #for raw txt only; do not use
     details = HStoreField(null=True,blank=True)
     licensees = models.TextField(null=True,blank=True) # makes Baby Jesus cry
 
@@ -84,11 +89,11 @@ class Concession(models.Model):
         for field in (
                 'name', 'type', 'status',
                 'source_document', 'source_date',
-                'retrieved_date', 'licensees',
-                'further_info'
+                'retrieved_date', 'details'
         ):
             data[field] = getattr(self, field) or ""
         data['country'] = self.country.code
+        data['licensees'] = [x.strip() for x in self.licensees.split(',')]
         return data
 
         

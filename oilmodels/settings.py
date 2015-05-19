@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
-from oilmodels.settings_private import DB_PASS, ALCHEMY_API_KEY
+from oilmodels.settings_private import DB_PASS, ALCHEMY_API_KEY, EMAIL_HOST_PASSWORD
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -25,9 +25,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '@8i*n^1jg2=@t8skj(q7_9ih=9883w@z@8_o25vv*#2)@*s+_8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['api.openoil.net', '46.4.51.137' ]
 
 
 # Application definition
@@ -124,3 +124,8 @@ STATIC_URL = '/static/'
 
 OOAPI_CONCESSIONS_DL_DIR='/data/concessions/'
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'daniel.ohuiginn@openoil.net'
+DEFAULT_FROM_EMAIL = 'daniel.ohuiginn@openoil.net'

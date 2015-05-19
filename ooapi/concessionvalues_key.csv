@@ -1,0 +1,84 @@
+original field,original term,no. times used,countries used,type,status
+status,application,4,TZ,,
+status,bidding 2008-2009,2,SR,,
+type,concession,14,CM,,
+type,concession being processed,3,PY,,
+type,contratos en revision,1,PY,,
+status,current bid round,8,TZ,,open
+type,deep offshore,13,PT,offshore,
+type,deep water exploration,12,AO,offshore,exploration
+type,deep water production,4,AO,offshore,production
+type,development licenses,3,TZ,,
+status,direct negotiation,2,PT,,
+type,"exclusive authorisation for 
+research",10,CM,,research
+type,exclusive authorisation for research,1,CM,,
+type,"exclusive exploitation 
+authorization",2,CM,,
+type,exploratiom and exploitation,23,GL,,production
+type,exploration,405,"MG, KE, SR, YE, BZ, TH, PK, TD, ES",,exploration
+type,exploration and production,46,"IS, TH",,exploration
+type,exploration licenses,23,TZ,,exploration
+type,exploration permit,42,TN,,
+type,exploration right,55,ZA,,production
+status,fields under development,3,GH,,
+status,I,8823,"SR, IS, AU, NE, IN",,
+type,improved petroleum recovery (ipr),3,MM,,production
+type,ipr,2,MM,,
+type,joa,1,MM,,
+type,legal concession,8,PY,,
+type,licensed area,10,LR,,
+type,licensing options,113,IE,offshore,
+type,moa,2,MM,,
+status,new application,10,BW,,open
+type,offshore,60,"TN, SR, TT, KH",onshore,
+type,offshore & onshore,5,SR,onshore+offshore,
+type,offshore exploration,32,"CY, GR",offshore,exploration
+status,offshore free blocks,4,AL,,
+status,offshore licenced blocks,2,AL,,
+type,offshore north deep block,4,SN,offshore,
+type,offshore north shallow blocks,4,SN,offshore,
+type,offshore open block,9,TN,offshore,open
+type,onshore,56,"TN, KH, PT",,exploration
+type,onshore and offshore exploration,9,AO,onshore+offshore,exploration
+type,onshore and offshore production,13,"AL, AO",onshore+offshore,
+type,onshore blocks,6,SN,onshore,
+status,onshore free blocks,10,AL,onshore,open
+status,onshore licensed blocks,8,AL,onshore,
+type,onshore open block,20,TN,offshore,open
+type,open,19,AO,,open
+status,open,240,"OM, TZ, CN, SR, IS, NE, SN, MR, LB, ML",,open
+type,open area,7,LR,,open
+status,open for bid,20,GR,,open
+status,open for bidding,15,MZ,,open
+type,open offshore,36,GQ,offshore,open
+type,open onshore,5,GQ,onshore,
+status,original,6,BW,,
+status,other projects,13,GH,,
+status,pending renewal,46,AU,,
+type,petroleum exploration licences,138,IE,,exploration
+type,petroleum leases,10,IE,,production
+status,preliminary evaluation license 7,1,PT,,
+status,producing fields,2,GH,,
+type,production,48,"SR, TD, YE, BZ, ES",,
+type,production right,142,ZA,,production
+type,production sharing contract (psc),13,MM,,production
+type,prospecting licences,20,GL,,exploration
+type,prospecting permits,12,PY,,exploration
+type,prospection permit,2,TN,,
+type,psc,14,MM,,
+status,psc signed,31,IN,,production
+status,relinquished,7,IS,,open
+type,research permit,2,CM,,research
+status,reserved,2,TZ,,
+type,sebikhotane block,1,SN,,
+type,senegal sud offshore blocks,1,SN,,
+type,senegal sud offshore shallow,1,SN,,
+type,service contract,33,PH,,
+type,tcp (technical cooperation permit),15,ZA,,
+type,terminated,2,MM,,
+type,thies block,2,SN,,
+type,ultra deep water exploration,10,AO,offshore,exploration
+status,under considert,3,MR,,
+type,under negotiation,1,KE,,
+status,unlicensed,9,UG,,open

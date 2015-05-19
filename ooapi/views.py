@@ -1,9 +1,41 @@
 from django.shortcuts import render
-from ooapi.models import Concession
+from ooapi.models import Concession,APIKey
+from django.core import exceptions
+from django.core.mail import send_mail
 
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponseForbidden,HttpResponse
 # Create your views here.
 
+
+def require_api_key(func):
+    def inner(request, *args, **kwargs):
+        key = request.GET.get('apikey', None)
+        try:
+            k = APIKey.objects.get(key=key)
+        except exceptions.ObjectDoesNotExist:
+            return HttpResponseForbidden()
+        return func(request, *args, **kwargs)
+    return inner
+
+def mail_apikey(apikey):
+    message = '''
+    Your key for the OpenOil API is %s
+
+    Learn how to use it at http://openoil.net/openoil-api/
+    ''' %apikey.key
+    send_mail('OpenOil API Key',message, 'daniel.ohuiginn@openoil.net', [apikey.email],fail_silently=False)
+    
+def new_api_key(request):
+    email = request.GET.get('email',None)
+    if email is None:
+        return render(request, 'apikey.jinja', {})
+    apikey = APIKey(email=email)
+    apikey.save()
+    mail_apikey(apikey)
+    return HttpResponse('your key has been mailed to you')
+
+
+@require_api_key
 def concessions(request):
     query = Concession.objects.all()
     
@@ -38,6 +70,8 @@ def concessions(request):
     }
     
     return JsonResponse(output, safe=False)
+
+
 
 def concs_as_dicts(matches):
     output = []

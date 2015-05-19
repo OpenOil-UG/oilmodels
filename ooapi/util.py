@@ -1,6 +1,7 @@
 from ooapi import models
 import csv
 import pycountry
+import os
 import re
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -10,7 +11,6 @@ import csv
 import sys
 
 APIKEY = 'VGm1FGzG9d6pZVqAxaQW10SVi9aaW6YJkPREI116aJA='
-
 
 def query_bing(query):
     url = 'https://api.datamarket.azure.com/Bing/Search/Web'
@@ -84,6 +84,41 @@ def get_status(desc):
     return None
 
 
+def get_key_dict():
+    fn = os.path.dirname(__file__) + '/concessionvalues_key.csv'
+    reader = csv.DictReader(open(fn))
+    keydata = {}
+    for line in reader:
+        k = line['original term']
+        res = {
+            'type': line['type'],
+            'status': line['status']}
+        keydata[k] = res
+    return keydata
+
+def fix_statuses():
+    # each processor returns a dict of with keys 'status'
+    # and 'type'. We combine these
+    kd = get_key_dict()
+    for row in models.Concession.objects.all():
+        if 'Type' not in row.details:
+            continue
+        results = []
+        
+        for input_field in ('Type', 'Status'):
+            results.append(
+                kd.get( row.details.get(input_field, '').lower(), {})
+            )
+            
+        for output_field in ('type', 'status'):
+            for result in results:
+                if result.get(output_field, None):
+                    print('got %s %s %s' % (row, output_field, result[output_field]))
+                    setattr(row, output_field, result[output_field])
+                    break
+        row.save()
+
+        
 def concession_from_csv(fname):
     reader = csv.DictReader(open(fname))
     isocountry = get_country_code(fname)
@@ -133,6 +168,9 @@ def fix_furtherinfo():
                 remainder = remainder +', ' + part
         row.details = d
         row.save()
+
+
+
 
 def keycounts():
     # stats on the keys found in the details field
