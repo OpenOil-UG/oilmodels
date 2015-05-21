@@ -35,6 +35,16 @@ def new_api_key(request):
     return HttpResponse('your key has been mailed to you')
 
 
+def concession(request, countrycode, identifier):
+    conc = Concession.objects.get(
+              country = countrycode.upper(),
+              name__iexact = identifier)
+    output = {
+        'api_version': 0.1,
+        'result': conc.infodict()
+    }
+    return JsonResponse(output, safe=False)
+
 @require_api_key
 def concessions(request):
     query = Concession.objects.all()

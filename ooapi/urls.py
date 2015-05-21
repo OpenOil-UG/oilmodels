@@ -6,7 +6,8 @@ from ooapi import views
 redir_to_docs = RedirectView.as_view(url='http://openoil.net/openoil-api/')
 
 v01_urlpatterns = [
-    url(r'^concessions/?', views.concessions, name="concessions"),
+    url(r'^concession/search?', views.concessions, name="concessions"),
+    url(r'^concession/(?P<countrycode>[^/]*)/(?P<identifier>.*)', views.concession, name="concession"),
     url(r'^apikey/generate/?', views.new_api_key, name="generate_api_key"),
     url(r'^/?', redir_to_docs),
     url(r'^documentation/?', redir_to_docs),

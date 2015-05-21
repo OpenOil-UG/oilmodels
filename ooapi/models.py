@@ -63,7 +63,7 @@ class APIKey(models.Model):
     email = models.EmailField(unique=True)
 
 class Concession(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200) # official govt. identifier
     country = CountryField(blank=True,null=True)
     type = models.CharField(max_length=30,
                             null=True,
@@ -92,11 +92,21 @@ class Concession(models.Model):
                 'retrieved_date', 'details'
         ):
             data[field] = getattr(self, field) or ""
+        data['identifier'] = self.identifier()
+        data['url_api'] = 'http://api.openoil.net/concession/%s' % data['identifier']
+        data['url_wiki'] = self.url_wiki()
         data['country'] = self.country.code
         data['licensees'] = [x.strip() for x in self.licensees.split(',')]
         return data
 
-        
+
+    def identifier(self):
+        return '%s/%s' % (self.country.code, self.name)
+
+    def url_wiki(self):
+        country_name = self.country.name #XXX check for naming mismatches
+        return 'http://repository.openoil.net/wiki/%s' % country_name
+    
     def __str__(self):
         return "%s (%s)" % (self.name, self.country)
 
