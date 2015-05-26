@@ -169,8 +169,13 @@ def fix_furtherinfo():
         row.details = d
         row.save()
 
-
-
+def companycount():
+    licensees = set()
+    for row in models.Concession.objects.all():
+        for company in row.licensees.split(','):
+            company = company.lower().strip()
+            licensees.add(company)
+    return licensees
 
 def keycounts():
     # stats on the keys found in the details field
@@ -198,3 +203,5 @@ def valuecounts(field):
     w = csv.writer(open('/tmp/concessionvalues_%s.csv' % field.lower(),'w'))
     for (label, count) in counts.most_common():
         w.writerow([label, count, ', '.join(countries[label])])
+
+
