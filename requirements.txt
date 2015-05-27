@@ -1,3 +1,5 @@
+requests
+gunicorn
 django
 psycopg2
 -e git://github.com/lukesneeringer/django-pgfields.git#egg=django-pgfields

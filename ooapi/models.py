@@ -62,6 +62,9 @@ class APIKey(models.Model):
     key = models.CharField(unique=True, max_length=25, default=new_key)
     email = models.EmailField(unique=True)
 
+    def __str__(self):
+        return self.email
+
 class Concession(models.Model):
     name = models.CharField(max_length=200) # official govt. identifier
     country = CountryField(blank=True,null=True)
