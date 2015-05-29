@@ -12,8 +12,8 @@ import moneyed
 COMMODITIES = (
         ('gas', 'Gas'),
         ('oil', 'Oil, grade unspecified'),
-        ('oil', 'Oil, heavy'),
-        ('oil', 'Oil, light and medium'),
+        ('oil_heavy', 'Oil, heavy'),
+        ('oil_light', 'Oil, light and medium'),
         )
 
 CONFIDENCE_MEASURES = [(x,x) for x in [
