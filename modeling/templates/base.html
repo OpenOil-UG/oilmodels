@@ -1,7 +1,11 @@
 <!doctype html>
 <html>
     <head>
-        <link rel="stylesheet" href="/static/django_tables2/themes/paleblue/css/screen.css" />
+      <link rel="stylesheet" href="/static/django_tables2/themes/paleblue/css/screen.css" />
+      {% block head_content %}
+
+      {% endblock %}
+      
     </head>
     <body>
       {% block page_content %}
