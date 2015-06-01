@@ -1,0 +1,3 @@
+project,company,date,commodity,actual_predicted,confidence,level,unit,per
+madeup,"acme inc",oil,actual,2P,999,field,bbls,day
+newy,"abcde",oil-heavy,predicted,1P,1004,well,bbls,year

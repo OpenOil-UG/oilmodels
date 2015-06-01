@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^info_types/?', views.infotypes, name="info_types"),
     url(r'^data_sources/?', views.datasources, name="data_sources"),
     url(r'^reserves/?', views.reserves, name="reserves"),
-    url(r'^production/??', views.production, name="production"),
-    url(r'^add/csv??', views.import_csv, name="import_csv"),
+    url(r'^production/?', views.production, name="production"),
+    url(r'^add/csv/?', views.import_csv, name="import_csv"),
+    url(r'^add/manual/?', views.import_manual, name="import_manual"),
 ]

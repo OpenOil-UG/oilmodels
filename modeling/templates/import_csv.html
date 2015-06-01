@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+
+<h2>Adding Data via CSV</h2>
+
+<b>Production</b>
+<ul>
+  <li>project</li>
+  <li>company</li>
+  <li>date</li>
+  <li>commodity</li>
+  <li>actual_predicted</li>
+  <li>confidence</li>
+  <li>level</li>
+  <li>unit</li>
+  <li>per</li>
+</ul>
+
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-error">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-error">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form action="#" method="POST"  enctype="multipart/form-data" >
+  {% csrf_token %}
+
+  
+  {{ form }}
+  
+ <input type="submit" value="Upload"/>
+</form>
+  
+{% endblock %}

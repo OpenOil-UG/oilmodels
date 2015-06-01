@@ -13,3 +13,4 @@ django-date-extensions
 py-moneyed
 django-money
 pycountry
+openpyxl

@@ -39,6 +39,7 @@ UNITS = (
     ('mmcf', 'Million cubic feet (mmcf/mmscf)'),
     ('mboe', 'Million barels oil equivalent'),
     ('tdf', 'Thousand Cubic Feet (mcf/mscf)'),
+    ('m3', 'Cubic Metres'),
             )
 
 REPORTING_LEVELS = (

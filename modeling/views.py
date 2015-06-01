@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django import forms
+from django.forms.formsets import formset_factory
 from django.http import HttpResponse
 from modeling import models
 
@@ -17,7 +18,6 @@ def infotypes(request):
 @login_required()
 def datasources(request):
     return render(request, "datatypes.html", {"tabledata": models.DataSource.objects.all()})
-
 
 @login_required()
 def reserves(request):
@@ -46,8 +46,7 @@ def process_csv(csvfile, klass):
             'production': models.Production,
             'reserve': models.Reserve,
             'cost': models.Cost}[klass]
-        if klass == 'production':
-            print(line)
+        if klass in ('production', 'reserve', 'cost'):
             project, created = models.Project.objects.get_or_create(
                 project_name = line.pop('project'), defaults = {'type': 'project'},
                 )
@@ -80,3 +79,19 @@ def import_csv(request):
     return render(request, "import_csv.html", {
         'form': form,
     })
+
+
+def make_modelform(klass):
+    class KlassForm(forms.ModelForm):
+        class Meta:
+            model = klass
+            exclude = []
+    return KlassForm
+    
+        
+@login_required()
+def import_manual(request):
+    klass = models.Reserve
+    formset = formset_factory(make_modelform(klass), extra=10)
+    return render(request, "import_manual.html", {'formset': formset})
+     
