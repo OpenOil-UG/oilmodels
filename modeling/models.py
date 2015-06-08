@@ -191,3 +191,16 @@ class TaskGroup(models.Model):
     description = models.CharField
     data = models.JSONField(null=True,blank=True)
     
+class UnreviewedData(models.Model):
+    '''
+    metadata should contain:
+     source document url
+     page number
+     date
+     reviewed
+          
+    '''
+    metadata = models.JSONField(null=True,blank=True)
+    
+    data = models.JSONField(null=True,blank=True)
+    # data should be a list of

@@ -14,3 +14,5 @@ py-moneyed
 django-money
 pycountry
 openpyxl
+pypdf
+pdfsplit

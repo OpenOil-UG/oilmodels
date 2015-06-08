@@ -122,7 +122,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
-
 OOAPI_CONCESSIONS_DL_DIR='/data/concessions/'
 
 EMAIL_USE_TLS = True

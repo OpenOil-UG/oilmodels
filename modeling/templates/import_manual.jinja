@@ -1,0 +1,94 @@
+{% extends "base.jinja" %}
+
+{% block head_content %}
+<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="/static/bower_components/handsontable/dist/handsontable.full.js"></script>
+<link rel="stylesheet" media="screen" href="/static/bower_components/handsontable/dist/handsontable.full.css">
+{% endblock %}
+
+{% block page_content %}
+<div id="example"></div>
+
+
+<a class="submit_sheet">Upload data<a/>
+<script>
+
+var data = {{ tabledata|safe }};
+
+var autocomplete_companies = {{ autocomplete_companies | safe }};
+var autocomplete_projects = {{ autocomplete_projects | safe }};
+var autocomplete_otherfields = {{ autocomplete_otherfields | safe }};
+
+var container = document.getElementById('example');
+
+var render_firstrow = function(instance,td,row,col,prop,value,cellProperties){
+    Handsontable.renderers.TextRenderer.apply(this,arguments); // ??? - cargo-culted from the docs
+    td.style.fontWeight = 'bold';
+    td.style.background = '#bbbbbb';
+}
+
+var hot = new Handsontable(container, {
+  data: data,
+  minSpareRows: 1,
+  rowHeaders: true,
+  colHeaders: true,
+    contextMenu: true,
+    cells: function(row, col, prop){
+	var cellProperties = {};
+	if(row==0){
+	    cellProperties.renderer = render_firstrow;
+	    cellProperties.readOnly = true;
+	}
+	else if(col==0){
+	    cellProperties.type = 'autocomplete';
+	    cellProperties.source = autocomplete_projects;
+	    cellProperties.strict = false;
+	}
+	else if(col==1){
+	    cellProperties.type = 'autocomplete';
+	    cellProperties.source = autocomplete_companies;
+	    cellProperties.strict = false;
+	}
+	else{
+	    header = data[0][col].toLowerCase();
+	    if(autocomplete_otherfields[header]){
+		cellProperties.type = 'autocomplete';
+		cellProperties.source = autocomplete_otherfields[header];
+		cellProperties.strict = false;
+
+	    }
+	    numeric_fields = ['level',];
+	    if(numeric_fields.indexOf(header) > -1){
+		console.log('found a numeric field');
+		cellProperties.type = 'numeric';
+	    }
+	    
+	}
+
+	return cellProperties
+    }
+	    
+});
+
+
+var save_contents = function(){
+    console.log('save_contents');
+    $.ajax({
+	'url': '/data/add/json/',
+	'type': 'POST',
+	'data': {
+	    'metadata': JSON.stringify({'type': 'production'}),
+	    'tabledata': JSON.stringify(hot.getData()),
+	    'csrfmiddlewaretoken': '{{csrf_token}}',
+	},
+	'success': function(json){console.log('posted')},
+    });
+    data = hot.getData();
+}
+$('.submit_sheet').click(save_contents);
+
+
+</script>
+
+
+{% endblock %}
