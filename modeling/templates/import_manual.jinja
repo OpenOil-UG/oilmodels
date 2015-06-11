@@ -7,11 +7,25 @@
 {% endblock %}
 
 {% block page_content %}
-<div id="example"></div>
 
+<h2>Step 2: Review data and copy into database</h2>
 
-<a class="submit_sheet">Upload data<a/>
+<p>We have extracted the data from page {{edata_obj.metadata['source_pagenum']}} of the document "<i>{{edata_obj.document.description}}</i>"</b>
+
+<p>Please copy appropriate information from here into the table at the bottom. When you have finished, click the button at the bottom to upload it into the Openoil database.</p>
+
+<p>You may also wish to <a href="{{edata_obj.document.source_url}}" target="_blank">consult the original document</a></p>
+
+<h3>Data Extracted from PDF</h3>
+<div id="extracted_data"></div>
+
+<h3>Add the correct data here</h3>
+<div id="output"></div>
+<input type="submit" value="Upload Data" class="submit_sheet"/>
 <script>
+
+// extracted data
+var edata = {{ edata_json | safe }};
 
 var data = {{ tabledata|safe }};
 
@@ -19,7 +33,6 @@ var autocomplete_companies = {{ autocomplete_companies | safe }};
 var autocomplete_projects = {{ autocomplete_projects | safe }};
 var autocomplete_otherfields = {{ autocomplete_otherfields | safe }};
 
-var container = document.getElementById('example');
 
 var render_firstrow = function(instance,td,row,col,prop,value,cellProperties){
     Handsontable.renderers.TextRenderer.apply(this,arguments); // ??? - cargo-culted from the docs
@@ -27,9 +40,15 @@ var render_firstrow = function(instance,td,row,col,prop,value,cellProperties){
     td.style.background = '#bbbbbb';
 }
 
-var hot = new Handsontable(container, {
+var ed_hot = new Handsontable(document.getElementById('extracted_data'), {
+    data: edata['data'],
+    minSpareRows: 1,
+    rowHeaders: true,
+    colHeaders: true});
+
+var hot = new Handsontable(document.getElementById('output'), {
   data: data,
-  minSpareRows: 1,
+  minSpareRows: 10,
   rowHeaders: true,
   colHeaders: true,
     contextMenu: true,
@@ -81,7 +100,8 @@ var save_contents = function(){
 	    'tabledata': JSON.stringify(hot.getData()),
 	    'csrfmiddlewaretoken': '{{csrf_token}}',
 	},
-	'success': function(json){console.log('posted')},
+	'success': function(json){
+	    alert('the data has been successfully added to the DB');},
     });
     data = hot.getData();
 }

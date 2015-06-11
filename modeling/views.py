@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django import forms
 from django.forms.formsets import formset_factory
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from modeling import models
 from modeling import pdftables
 
@@ -99,29 +99,34 @@ def make_modelform(klass):
     class KlassForm(forms.ModelForm):
         class Meta:
             model = klass
-            exclude = []
+            exclude = ['source',]
     return KlassForm
 
-class ImportPdfForm(forms.ModelForm):
-    class Meta:
-        model = models.Document
-        exclude = []
 
 class ImportPDFForm(forms.Form):
     doc_description = forms.CharField(label="description of the source", max_length=100)
     doc_url = forms.URLField(label="where is the PDF?")
     pagenum = forms.IntegerField(label="what page of the PDF do you want data from?")
+    information_type = forms.ChoiceField(
+        label = 'What kind of information is on this page?',
+        choices = (
+            ('production', 'Production'),
+            ('reserves', 'Reserves'),
+            ('costs', 'Costs')
+               ) )
 
 def process_new_document(form):
     # create a Document instance
     doc = models.Document(
         source_url = form.cleaned_data['doc_url'],
         description = form.cleaned_data['doc_description'])
+    doc.save()
 
     metadata = {
         'uploaded_date': datetime.datetime.now().strftime('%F'),
         'import_method': 'web upload form',
         'source_pagenum': form.cleaned_data['pagenum'],
+        'information_type': form.cleaned_data['information_type'],
         }
     
     # send the page through PDFtables
@@ -131,6 +136,7 @@ def process_new_document(form):
     # compile results into the database
     edata = models.ExtractedData(
         metadata = metadata,
+        document = doc,
         data = as_json)
     edata.save()
     # return ExtractedData
@@ -143,7 +149,8 @@ def import_pdf(request):
         if form.is_valid():
             print('form OK') # XXX writeme
             edata = process_new_document(form)
-            return HttpResponse('OK') # redirect to the form
+            step2_url = '/data/add/manual?edata=%s&type=%s' % (edata.id, edata.metadata['information_type'])
+            return HttpResponseRedirect(step2_url) # redirect to the form
         else:
             print('form not OK')
 
@@ -154,11 +161,26 @@ def import_pdf(request):
             'form': form,
         })
 
+
 @login_required()
 def import_manual(request):
+
+
+    # Extracted data
+    edata_id = request.GET.get('edata', None)
+    edata = None
+    if edata_id:
+        try:
+            edata = models.ExtractedData.objects.get(pk=edata_id)
+        except (ValueError, models.ExtractedData.DoesNotExist):
+            pass
+        # grab edata by ID (access checks here!)
+
+
+    # Output table
     modelname = request.GET.get('type', 'production')
     klass = MODELCLASSES.get(modelname, models.Production)
-    mo1delform = make_modelform(klass)
+    modelform = make_modelform(klass)
     columns = [x.title() for x in modelform.base_fields.keys()]
 
     # autocomplete for all the choice fields
@@ -176,14 +198,22 @@ def import_manual(request):
     autocomplete_projects = [x.project_name for x in models.Project.objects.all()]
     for i in range(5):
         tabledata.append([''] * len(columns))
-    formset = formset_factory(make_modelform(klass), extra=10)
-    return render(request, "import_manual.jinja", {
-        'formset': formset,
+    #formset = formset_factory(make_modelform(klass), extra=10)
+
+    templatedata = {
+        #'formset': formset,
+        # output table 
         'tabledata': json.dumps(tabledata),
         'autocomplete_projects': json.dumps(autocomplete_projects),
         'autocomplete_companies': json.dumps(autocomplete_companies),
         'autocomplete_otherfields': json.dumps(autocomplete_fields),
-                                                   })
+                                                   }
+    if edata:
+        templatedata['edata_json'] = json.dumps(edata.data)
+        templatedata['edata_obj'] = edata
+    else:
+        templatedata['edata_json'] = ''
+    return render(request, "import_manual.jinja", templatedata)
 
 
 @login_required()
