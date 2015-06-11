@@ -4,6 +4,8 @@ Wrapper for PDFTables
 
 APIKEY = '5z5um8568wpx'
 
+import csv
+import json
 import os
 import requests
 import tempfile
@@ -28,7 +30,7 @@ def tables_from_page(pagefn):
     files = {'f': ('upload.pdf', open(pagefn, 'rb'))}
     response = requests.post("https://pdftables.com/api?key=5z5um8568wpx&format=csv", files=files)
     response.raise_for_status() # ensure we notice bad responses
-    return response
+    return response.text
 
 
 def page_to_csv(pdfurl, pagenumber):
@@ -36,7 +38,6 @@ def page_to_csv(pdfurl, pagenumber):
     Split out one page from a (potentially multipage) pdf file
     send it to pdftables, get back the table
     pagenumber is given **counting from 1** (not zero)
-
     '''
     fullfile = dl_pdf(pdfurl)
     fn_page = page_from_pdf(fullfile.name, pagenumber)
@@ -44,8 +45,15 @@ def page_to_csv(pdfurl, pagenumber):
     os.unlink(fullfile.name)
     return result
 
+def csv_to_json(csvtext):
+    reader = csv.reader(csvtext.split('\n'))
+    return json.dumps(
+        {'data': list(reader)})
+
 
 def test_pdftables():
     url = 'http://www.nnpcgroup.com/Portals/0/Monthly%20Performance/2002%20Annual%20Statistical%20Bulletin%20ASB.pdf'
     page = 24
     return page_to_csv(url, page)
+
+

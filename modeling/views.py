@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django import forms
 from django.forms.formsets import formset_factory
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from modeling import models
+from modeling import pdftables
 
 import csv
+import datetime
 import io
 import json
 import dateutil.parser
@@ -44,7 +46,7 @@ class CSVUploadForm(forms.Form):
                ) )
     file = forms.FileField(required=True)
 
-
+    
 def process_csv(csvfile, klass):
     stringfile = io.StringIO(csvfile.read().decode(encoding="UTF-8"))
     reader = csv.DictReader(stringfile)
@@ -99,13 +101,64 @@ def make_modelform(klass):
             model = klass
             exclude = []
     return KlassForm
+
+class ImportPdfForm(forms.ModelForm):
+    class Meta:
+        model = models.Document
+        exclude = []
+
+class ImportPDFForm(forms.Form):
+    doc_description = forms.CharField(label="description of the source", max_length=100)
+    doc_url = forms.URLField(label="where is the PDF?")
+    pagenum = forms.IntegerField(label="what page of the PDF do you want data from?")
+
+def process_new_document(form):
+    # create a Document instance
+    doc = models.Document(
+        source_url = form.cleaned_data['doc_url'],
+        description = form.cleaned_data['doc_description'])
+
+    metadata = {
+        'uploaded_date': datetime.datetime.now().strftime('%F'),
+        'import_method': 'web upload form',
+        'source_pagenum': form.cleaned_data['pagenum'],
+        }
     
-        
+    # send the page through PDFtables
+    csvblob = pdftables.page_to_csv(form.cleaned_data['doc_url'], form.cleaned_data['pagenum'])
+    as_json = pdftables.csv_to_json(csvblob)
+
+    # compile results into the database
+    edata = models.ExtractedData(
+        metadata = metadata,
+        data = as_json)
+    edata.save()
+    # return ExtractedData
+    return edata
+    
+@login_required()
+def import_pdf(request):
+    if request.method == 'POST':
+        form = ImportPDFForm(request.POST, request.FILES)
+        if form.is_valid():
+            print('form OK') # XXX writeme
+            edata = process_new_document(form)
+            return HttpResponse('OK') # redirect to the form
+        else:
+            print('form not OK')
+
+    else:
+        form = ImportPDFForm()
+
+    return render(request, "import_pdf.jinja", {
+            'form': form,
+        })
+
 @login_required()
 def import_manual(request):
     modelname = request.GET.get('type', 'production')
     klass = MODELCLASSES.get(modelname, models.Production)
-    modelform = make_modelform(klass)
+    mo1delform = make_modelform(klass)
     columns = [x.title() for x in modelform.base_fields.keys()]
 
     # autocomplete for all the choice fields

@@ -1,0 +1,41 @@
+{% extends "base.jinja" %}
+
+{% block head_content %}
+<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="/static/bower_components/handsontable/dist/handsontable.full.js"></script>
+<link rel="stylesheet" media="screen" href="/static/bower_components/handsontable/dist/handsontable.full.css">
+{% endblock %}
+
+{% block page_content %}
+
+
+<h3>Add tabular data from a PDF document</h3>
+
+<div>
+<b>Step 1: Upload and page selection</b>
+Upload a PDF document, and indicate a page you wish to add into the database. The page should contain a table with information on extractives reserve, production or cost figures
+</div>
+<br/>
+<br/>
+
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-error">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+{% endif %}
+
+
+<form action="#" method="POST"  enctype="multipart/form-data" >
+<table>
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{{form.as_table()}}
+</table>
+<input type="submit"/>
+</form>
+
+{% endblock %}

@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^add/csv/?', views.import_csv, name="import_csv"),
     url(r'^add/manual/?', views.import_manual, name="import_manual"),
     url(r'^add/json/?', views.import_json, name="import_json"),
+    url(r'^add/pdf/?', views.import_pdf, name="import_pdf"),
 ]

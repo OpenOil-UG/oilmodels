@@ -132,10 +132,12 @@ class Contract(models.Model):
 
 class Document(models.Model):
     doc_id = models.CharField(primary_key=True, max_length=200, default=random_id)
+    description  = models.CharField(blank=True,null=True,max_length=300)
     host_url = models.CharField(max_length=200, default='')
     source_url = models.CharField(max_length=200, default='')
     source = models.ForeignKey('SourceInfo', null=True,blank=True)
-
+    metadata = models.JSONField(null=True,blank=True)
+    
     class Meta:
         db_table = 'document_table'
 

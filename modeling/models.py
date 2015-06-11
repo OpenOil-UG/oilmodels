@@ -191,7 +191,7 @@ class TaskGroup(models.Model):
     description = models.CharField
     data = models.JSONField(null=True,blank=True)
     
-class UnreviewedData(models.Model):
+class ExtractedData(models.Model):
     '''
     metadata should contain:
      source document url
@@ -200,7 +200,8 @@ class UnreviewedData(models.Model):
      reviewed
           
     '''
-    metadata = models.JSONField(null=True,blank=True)
-    
+    metadata = models.JSONField(null=True,blank=True)    
     data = models.JSONField(null=True,blank=True)
     # data should be a list of
+    document = models.ForeignKey(Document, blank=True,null=True)
+    reviewed = models.BooleanField(default=False)
