@@ -10,11 +10,13 @@
 
 <h2>Step 2: Review data and copy into database</h2>
 
+{% if edata_obj %}
 <p>We have extracted the data from page {{edata_obj.metadata['source_pagenum']}} of the document "<i>{{edata_obj.document.description}}</i>"</b>
 
 <p>Please copy appropriate information from here into the table at the bottom. When you have finished, click the button at the bottom to upload it into the Openoil database.</p>
 
 <p>You may also wish to <a href="{{edata_obj.document.source_url}}" target="_blank">consult the original document</a></p>
+{% endif %}
 
 <h3>Data Extracted from PDF</h3>
 <div id="extracted_data"></div>
@@ -49,6 +51,13 @@ var ed_hot = new Handsontable(document.getElementById('extracted_data'), {
 var hot = new Handsontable(document.getElementById('output'), {
   data: data,
   minSpareRows: 10,
+  beforeChange: function(changes, source){
+      for(i in changes){
+	  console.log(change);
+      }
+      console.log('broken');
+      console.log(changes,source);
+    },
   rowHeaders: true,
   colHeaders: true,
     contextMenu: true,
@@ -78,7 +87,6 @@ var hot = new Handsontable(document.getElementById('output'), {
 	    }
 	    numeric_fields = ['level',];
 	    if(numeric_fields.indexOf(header) > -1){
-		console.log('found a numeric field');
 		cellProperties.type = 'numeric';
 	    }
 	    
@@ -92,14 +100,24 @@ var hot = new Handsontable(document.getElementById('output'), {
 
 var save_contents = function(){
     console.log('save_contents');
-    $.ajax({
-	'url': '/data/add/json/',
-	'type': 'POST',
-	'data': {
-	    'metadata': JSON.stringify({'type': 'production'}),
+    data_for_post = {
+	    'metadata': JSON.stringify(
+		{'type': 'production',
+
+		 {% if edata_obj %}
+		 'edata_id': {{edata_obj.id}},
+		 {% endif %}
+
+		 
+		}),
 	    'tabledata': JSON.stringify(hot.getData()),
 	    'csrfmiddlewaretoken': '{{csrf_token}}',
 	},
+
+    $.ajax({
+	'url': '/data/add/json/',
+	'type': 'POST',
+	'data': data_for_post,
 	'success': function(json){
 	    alert('the data has been successfully added to the DB');},
     });

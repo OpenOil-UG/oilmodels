@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django import forms
+from django.contrib import messages
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from modeling import models
@@ -21,6 +22,10 @@ MODELCLASSES = {
     'cost': models.Cost}
 
 @login_required()
+def dataindex(request):
+    return render(request, "dataindex.jinja", {})
+
+@login_required()
 def infotypes(request):
     return render(request, "datatypes.html", {"tabledata": models.InformationType.objects.all()})
 
@@ -36,6 +41,10 @@ def reserves(request):
 def production(request):
     return render(request, "datatypes.html", {"tabledata": models.Production.objects.all()})
 
+
+@login_required()
+def costs(request):
+    return render(request, "datatypes.html", {"tabledata": models.Cost.objects.all()})
 
 class CSVUploadForm(forms.Form):
     category = forms.ChoiceField(
@@ -90,7 +99,7 @@ def import_csv(request):
     else:
         form = CSVUploadForm()
     
-    return render(request, "import_csv.html", {
+    return render(request, "import_csv.jinja", {
         'form': form,
     })
 
@@ -152,7 +161,7 @@ def import_pdf(request):
             step2_url = '/data/add/manual?edata=%s&type=%s' % (edata.id, edata.metadata['information_type'])
             return HttpResponseRedirect(step2_url) # redirect to the form
         else:
-            print('form not OK')
+            pass
 
     else:
         form = ImportPDFForm()
@@ -165,7 +174,6 @@ def import_pdf(request):
 @login_required()
 def import_manual(request):
 
-
     # Extracted data
     edata_id = request.GET.get('edata', None)
     edata = None
@@ -175,7 +183,6 @@ def import_manual(request):
         except (ValueError, models.ExtractedData.DoesNotExist):
             pass
         # grab edata by ID (access checks here!)
-
 
     # Output table
     modelname = request.GET.get('type', 'production')
@@ -212,10 +219,25 @@ def import_manual(request):
         templatedata['edata_json'] = json.dumps(edata.data)
         templatedata['edata_obj'] = edata
     else:
-        templatedata['edata_json'] = ''
+        templatedata['edata_json'] = json.dumps({})
+        templatedata['edata_obj'] = ''
     return render(request, "import_manual.jinja", templatedata)
 
+def mark_data_processed(metadata):
+    '''
+    if this data is associated with an ExtractedData object, mark the latter
+    as reviewed
+    '''
+    edata_id = metadata.get('edata_id', None)
+    try:
+        edata = models.ExtractedData.objects.get(pk=edata_id)
+    except (ValueError, models.ExtractedData.DoesNotExist):
+        return
+    edata.reviewed = True
+    edata.save()
+    return
 
+    
 @login_required()
 def import_json(request):
     '''handle uploaded tabular data
@@ -227,6 +249,7 @@ def import_json(request):
         metadata = json.loads(request.POST['metadata'])
         klass = 'production' #XXX writme!
         cols = [x.lower() for x in tabledata[0]]
+
         for row in tabledata[1:]:
             if not any(row):
                 break
@@ -235,9 +258,7 @@ def import_json(request):
             rowdata = dict(itertools.ifilter(lambda (x,y): y, labeled_rows))
             print(rowdata)
             add_row(rowdata, klass)
-        import pprint
-        pprint.pprint(tabledata)
-        pprint.pprint(metadata)
+        mark_data_processed(metadata)
     else:
         print('not even a post')
-    return HttpResponse('OK')
+    return HttpResponseRedirect('/data') # redirect to the form

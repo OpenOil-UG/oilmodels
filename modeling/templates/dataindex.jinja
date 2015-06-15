@@ -1,0 +1,29 @@
+{% extends "base.jinja" %}
+
+{% block page_content %}
+
+
+<b>View data</b>
+<ul>
+<li>Overview of external data
+ <ul>
+<li><a href="/data/info_types">Information types</a></li>
+<li><a href="/data/data_sources">Data sources</a></li>
+</ul>
+<li>Gathered data on
+<ul>
+<li><a href="/data/reserves">Reserves</a></li>
+<li><a href="/data/production">Production</a></li>
+<li><a href="/data/costs">Costs</a></li>
+</ul>
+</li>
+</ul>
+
+<b>Add Data</b>
+<ul>
+<li><a href="/data/add/csv">From a CSV file</a></li>
+<li><a href="/data/add/pdf">From a PDF</a>, copying table data into our spreadsheet</li>
+<li><a href="/data/add/manual">Manually</a>, by typing it into a spreadsheet interface </li>
+</ul>
+
+{% endblock %}
