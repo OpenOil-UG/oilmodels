@@ -66,6 +66,24 @@ def csv_to_json(csvtext):
         {'data': list(reader)})
 
 
+def interpret_range(rstr):
+    '''
+    turn a range specification string into a list of pages
+    '''
+    pages = []
+    for spec in rstr.split(','):
+        spec = spec.strip()
+        if spec.isdigit():
+            pages.append(int(spec))
+        elif '-' in spec:
+            l,r = [x.strip() for x in spec.split('-', 1)]
+            if not (l.isdigit and r.isdigit()):
+                raise ValueError
+            for pn in range(int(l), int(r)+1):
+                pages.append(pn)
+    return pages
+            
+
 def test_pdftables():
     url = 'http://www.nnpcgroup.com/Portals/0/Monthly%20Performance/2002%20Annual%20Statistical%20Bulletin%20ASB.pdf'
     page = 24

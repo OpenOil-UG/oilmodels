@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^add/manual/?', views.import_manual, name="import_manual"),
     url(r'^add/json/?', views.import_json, name="import_json"),
     url(r'^add/pdf/?', views.import_pdf, name="import_pdf"),
+    url(r'^add/queue/?', views.review_queue, name="review_queue"),
 ]

@@ -69,7 +69,14 @@ def add_row(line, klass):
             project, created = models.Project.objects.get_or_create(
                 project_name = line.pop('project'), defaults = {'type': 'project'},
                 )
-            date = dateutil.parser.parse(line.pop('date')).strftime('%Y-%m-%d')
+            try:
+                rawdate = line.pop('date')
+                date = ApproximateDateFormField().clean(rawdate)
+            except ValueError:
+                messages.add_message(request, messages.ERROR,
+                                     'could not make sense of date %s' % rawdate)
+                date = None
+            #date = dateutil.parser.parse(line.pop('date')).strftime('%Y-%m-%d')
             if klass in ('production', 'reserve'):
                 company, created = models.Company.objects.get_or_create(
                     company_name = line.pop('company'))
@@ -115,7 +122,21 @@ def make_modelform(klass):
 class ImportPDFForm(forms.Form):
     doc_description = forms.CharField(label="description of the source", max_length=100)
     doc_url = forms.URLField(label="where is the PDF?")
-    pagenum = forms.IntegerField(label="what page of the PDF do you want data from?")
+    pagenum = forms.CharField(label="what pages of the PDF do you want data from?")
+
+
+    # set up the greyed-out text
+    placeholders = {
+        doc_description: 'try to be unique!',
+        doc_url: 'http://example.com/dir/file.pdf',
+        pagenum: '1,3,4-8',
+    }
+    for (k,v) in placeholders.items():
+        k.widget = forms.TextInput(
+            attrs = {'placeholder': v})
+
+    del(k) # otherwise, Django will interpret this as another field to add
+    
     information_type = forms.ChoiceField(
         label = 'What kind of information is on this page?',
         choices = (
@@ -137,19 +158,30 @@ def process_new_document(form):
         'source_pagenum': form.cleaned_data['pagenum'],
         'information_type': form.cleaned_data['information_type'],
         }
-    
+    pagenums = pdftables.interpret_range(form.cleaned_data['pagenum'])
+    pdfurl = form.cleaned_data['doc_url']
+    fullfile = pdftables.dl_pdf(pdfurl)
+    edatas = []
+    for pagenum in pagenums:
+        fn_page = pdftables.page_from_pdf(fullfile.name, pagenum)
+        result = pdftables.tables_from_page(fn_page)
+        as_json = pdftables.csv_to_json(result)
+        edata = models.ExtractedData(
+            metadata = metadata,
+            document = doc,
+            data = as_json)
+        edata.save()
+        edatas.append(edata)
+    return(edatas)
+
+
     # send the page through PDFtables
-    csvblob = pdftables.page_to_csv(form.cleaned_data['doc_url'], form.cleaned_data['pagenum'])
-    as_json = pdftables.csv_to_json(csvblob)
+    #csvblob = pdftables.page_to_csv(form.cleaned_data['doc_url'], form.cleaned_data['pagenum'])
+    #as_json = pdftables.csv_to_json(csvblob)
 
     # compile results into the database
-    edata = models.ExtractedData(
-        metadata = metadata,
-        document = doc,
-        data = as_json)
-    edata.save()
     # return ExtractedData
-    return edata
+    #return edata
     
 @login_required()
 def import_pdf(request):
@@ -157,8 +189,9 @@ def import_pdf(request):
         form = ImportPDFForm(request.POST, request.FILES)
         if form.is_valid():
             print('form OK') # XXX writeme
-            edata = process_new_document(form)
-            step2_url = '/data/add/manual?edata=%s&type=%s' % (edata.id, edata.metadata['information_type'])
+            edatas = process_new_document(form)
+            messages.add_message(request, messages.INFO, "Added %s pages to review queue" % len(edatas))
+            step2_url = '/data/add/manual?edata=%s&type=%s' % (edatas[0].id, edatas[0].metadata['information_type'])
             return HttpResponseRedirect(step2_url) # redirect to the form
         else:
             pass
@@ -237,6 +270,15 @@ def mark_data_processed(metadata):
     edata.save()
     return
 
+
+@login_required()
+def review_queue(request):
+    next_for_review = models.ExtractedData.objects.filter(reviewed=False).first()
+    if next_for_review is None:
+        messages.add_message(request, messages.INFO, "There are no more data review tasks to complete")
+        return HttpResponseRedirect('/data') # redirect to the form
+    url = '/data/add/manual?edata=%s' % next_for_review.id
+    return HttpResponseRedirect(url) # redirect to the form
     
 @login_required()
 def import_json(request):
@@ -261,4 +303,4 @@ def import_json(request):
         mark_data_processed(metadata)
     else:
         print('not even a post')
-    return HttpResponseRedirect('/data') # redirect to the form
+    return HttpResponseRedirect('/review/queue') # redirect to the form

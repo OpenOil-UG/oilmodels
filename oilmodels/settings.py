@@ -66,6 +66,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "match_extension": ".jinja",
+            "environment": "oilmodels.jinjaconfig.environment",
         }
     },
     {
