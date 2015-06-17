@@ -3,6 +3,7 @@ from django import forms
 from django.contrib import messages
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
+from django_date_extensions.fields import ApproximateDateFormField
 from modeling import models
 from modeling import pdftables
 

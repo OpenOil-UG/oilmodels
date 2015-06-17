@@ -52,12 +52,21 @@ var hot = new Handsontable(document.getElementById('output'), {
   data: data,
   minSpareRows: 10,
   beforeChange: function(changes, source){
+	  // convert number-strings like "42,000" into numbers
+	  // on numeric columns only
+	  
       for(i in changes){
-	  console.log(change);
+		  change = changes[i] // [row,column, 'before', 'after']		  
+		  if(this.getCellMeta(change[0], change[1])['type'] == 'numeric'){
+			  // numeral.js turns non-numeric input into 0
+			  // so we turn 0s back into the original string
+			  // (which just means a pointless round-trip if the input
+			  // really is 0)
+			  change[3] = numeral(change[3]).value() || change[3];
+			  }
       }
-      console.log('broken');
-      console.log(changes,source);
-    },
+  },
+	
   rowHeaders: true,
   colHeaders: true,
     contextMenu: true,
