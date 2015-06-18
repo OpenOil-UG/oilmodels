@@ -145,17 +145,11 @@ class ImportPDFForm(forms.Form):
     }
     for (k,v) in placeholders.items():
         k.widget = forms.TextInput(
-            attrs = {'placeholder': v})
+            attrs = {'placeholder': v,
+                     'size': "100"})
 
     del(k) # otherwise, Django will interpret this as another field to add
     
-    information_type = forms.ChoiceField(
-        label = 'What kind of information is on this page?',
-        choices = (
-            ('production', 'Production'),
-            ('reserves', 'Reserves'),
-            ('costs', 'Costs')
-               ) )
 
 def process_new_document(form):
     # create a Document instance
@@ -168,7 +162,6 @@ def process_new_document(form):
         'uploaded_date': datetime.datetime.now().strftime('%F'),
         'import_method': 'web upload form',
         'source_pagenum': form.cleaned_data['pagenum'],
-        'information_type': form.cleaned_data['information_type'],
         }
     pagenums = pdftables.interpret_range(form.cleaned_data['pagenum'])
     pdfurl = form.cleaned_data['doc_url']
@@ -202,7 +195,7 @@ def import_pdf(request):
         if form.is_valid():
             edatas = process_new_document(form)
             messages.add_message(request, messages.INFO, "Added %s pages to review queue" % len(edatas))
-            step2_url = '/data/add/manual?edata=%s&type=%s' % (edatas[0].id, edatas[0].metadata['information_type'])
+            step2_url = '/data/add/manual?edata=%s' % (edatas[0].id)
             return HttpResponseRedirect(step2_url) # redirect to the form
         else:
             pass
