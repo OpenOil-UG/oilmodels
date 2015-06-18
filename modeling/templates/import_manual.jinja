@@ -85,6 +85,8 @@ var make_hot = function(data, label, element, autocomplete){
 	var hot = new Handsontable(element, {
 	  data: data,
 	  minSpareRows: 10,
+	  minSpareCols: 5,
+	  colWidths: 160,
 	  beforeChange: function(changes, source){
 		  // convert number-strings like "42,000" into numbers
 		  // on numeric columns only
@@ -108,7 +110,9 @@ var make_hot = function(data, label, element, autocomplete){
 		var cellProperties = {};
 		if(row==0){
 			cellProperties.renderer = render_firstrow;
-			cellProperties.readOnly = true;
+			if(data[0][col]){ // this is one of the original columns
+				cellProperties.readOnly = true;
+				}
 		}
 		else if(col==0){
 			cellProperties.type = 'autocomplete';
@@ -121,7 +125,9 @@ var make_hot = function(data, label, element, autocomplete){
 			cellProperties.strict = false;
 		}
 		else{
-			header = data[0][col].toLowerCase();
+			if(data[0][col]){
+				header = data[0][col].toLowerCase();
+				}
 			if(autocomplete[header]){
 			cellProperties.type = 'autocomplete';
 			cellProperties.source = autocomplete[header];

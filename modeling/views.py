@@ -64,7 +64,7 @@ def process_csv(csvfile, klass):
         add_row(line,klass)
 
 
-def add_row(line, klass):        
+def add_row(line, klass, standard_cols):
         modelclass = MODELCLASSES[klass]
         if klass in ('production', 'reserves', 'costs'):
             project, created = models.Project.objects.get_or_create(
@@ -77,15 +77,19 @@ def add_row(line, klass):
                 messages.add_message(request, messages.ERROR,
                                      'could not make sense of date %s' % rawdate)
                 date = None
-            #date = dateutil.parser.parse(line.pop('date')).strftime('%Y-%m-%d')
             if klass in ('production', 'reserves'):
                 company, created = models.Company.objects.get_or_create(
                     company_name = line.pop('company'))
                 line['company'] = company
-            print(modelclass, line)
+            extra_data = {}
+            for k in line.keys():
+                if k not in standard_cols:
+                    extra_data[k] = line.pop(k)
+                    
             newrow = modelclass(
                 project = project,
                 date=date,
+                extra_data = extra_data,
                 **line)
             newrow.save()
             # XXX add sourcing info here
@@ -98,11 +102,11 @@ def import_csv(request):
     if request.method == 'POST':
         form = CSVUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            print('form OK') # XXX writeme
             process_csv(request.FILES['file'], form.cleaned_data['category'])
             return HttpResponse('OK')
         else:
-            print('form not OK')
+            pass
+
 
     else:
         form = CSVUploadForm()
@@ -189,7 +193,6 @@ def import_pdf(request):
     if request.method == 'POST':
         form = ImportPDFForm(request.POST, request.FILES)
         if form.is_valid():
-            print('form OK') # XXX writeme
             edatas = process_new_document(form)
             messages.add_message(request, messages.INFO, "Added %s pages to review queue" % len(edatas))
             step2_url = '/data/add/manual?edata=%s&type=%s' % (edatas[0].id, edatas[0].metadata['information_type'])
@@ -204,10 +207,20 @@ def import_pdf(request):
             'form': form,
         })
 
-def build_empty_table_json(modelname):
+def get_columns(modelname):
     klass = MODELCLASSES.get(modelname, models.Production)
     modelform = make_modelform(klass)
     columns = [x.title() for x in modelform.base_fields.keys()]
+    columns.pop(columns.index('Extra_Data'))
+    return columns
+    
+
+def build_empty_table_json(modelname):
+    columns = get_columns(modelname)
+
+    klass = MODELCLASSES.get(modelname, models.Production)
+    modelform = make_modelform(klass)
+    
     tabledata = [columns]
     for i in range(5):
         tabledata.append([''] * len(columns))
@@ -220,6 +233,7 @@ def build_empty_table_json(modelname):
                                and x not in (
                                    'company', 'project', #handled separately
                                    'source_document', #not yet implemented
+                                   'extra_data', #done with manually-added columns
                                ))
 
     return json.dumps(tabledata), json.dumps(autocomplete_fields)
@@ -305,17 +319,16 @@ def import_json(request):
         tabledata = json.loads(request.POST['tabledata'])
         metadata = json.loads(request.POST['metadata'])
         klass = metadata['type']
-        cols = [x.lower() for x in tabledata[0]]
+        cols = [x.lower() for x in tabledata[0] if x]
+        standard_cols = [x.lower() for x in get_columns(klass)]
 
         for row in tabledata[1:]:
             if not any(row):
                 break
             labeled_rows = zip(cols,row)
             # treat blank rows as blank -- let the model fill in the defaults
-            rowdata = dict(itertools.ifilter(lambda (x,y): y, labeled_rows))
-            print(rowdata)
-            add_row(rowdata, klass)
+            rowdata = dict(itertools.ifilter(lambda (x,y): y != "", labeled_rows))
+            add_row(rowdata, klass, standard_cols)
         mark_data_processed(metadata)
-    else:
-        print('not even a post')
-    return HttpResponseRedirect('/data/add/queue') # should be just an empty page
+    return HttpResponse('OK')
+

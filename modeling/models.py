@@ -105,6 +105,8 @@ class Cost(models.Model):
     per = models.CharField(
         max_length=30,
         choices=TIME_PERIODS + (('barrel', 'barrel'),))
+
+    extra_data = models.JSONField(null=True,blank=True)
     
 class Reserve(models.Model):
 
@@ -131,6 +133,7 @@ class Reserve(models.Model):
         
     source_document = models.ForeignKey(Document, blank=True, null=True)
 
+    extra_data = models.JSONField(null=True,blank=True)
 
     def __str__(self):
         if self.project and self.project.project_name:
@@ -170,7 +173,11 @@ class Production(models.Model):
         default='year')
 
     source = models.ForeignKey(Document, blank=True, null=True)
-    
+
+    extra_data = models.JSONField(null=True,blank=True)
+
+    class Meta:
+        ordering = ['-date']
 
 class Task(models.Model):
     source = models.ForeignKey(Document)
