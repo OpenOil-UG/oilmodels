@@ -42,7 +42,7 @@
 	  <div id="output_costs"></div>
   </div>
   <div id="tabs-4">
-	  [Not implemented Yet]
+	  <div id="output_extra_information"></div>
   </div>
 </div>
 
@@ -59,10 +59,12 @@ var edata = {{ edata_json | safe }};
 var headers_production = {{ headers_production|safe }};
 var headers_reserves = {{ headers_reserves|safe }};
 var headers_costs = {{ headers_costs|safe }};
+var headers_extra_information = {{ headers_extra_information|safe }};
 
 var autocomplete_production = {{ autocomplete_production | safe }};
 var autocomplete_reserves = {{ autocomplete_reserves | safe }};
 var autocomplete_costs = {{ autocomplete_costs | safe }};
+var autocomplete_extra_information = {{ autocomplete_extra_information | safe }};
 
 var autocomplete_companies = {{ autocomplete_companies | safe }};
 var autocomplete_projects = {{ autocomplete_projects | safe }};
@@ -82,6 +84,7 @@ var ed_hot = new Handsontable(document.getElementById('extracted_data'), {
     colHeaders: true});
 
 var make_hot = function(data, label, element, autocomplete){
+	colheaders = data[0].slice();
 	var hot = new Handsontable(element, {
 	  data: data,
 	  minSpareRows: 10,
@@ -110,7 +113,7 @@ var make_hot = function(data, label, element, autocomplete){
 		var cellProperties = {};
 		if(row==0){
 			cellProperties.renderer = render_firstrow;
-			if(data[0][col]){ // this is one of the original columns
+			if(colheaders[col]){ // this is one of the original columns
 				cellProperties.readOnly = true;
 				}
 		}
@@ -150,6 +153,8 @@ var make_hot = function(data, label, element, autocomplete){
 var hot_production = make_hot(headers_production, 'production', document.getElementById('output_production'), autocomplete_production);
 var hot_reserves = make_hot(headers_reserves, 'reserves', document.getElementById('output_reserves'), autocomplete_reserves);
 var hot_costs = make_hot(headers_costs, 'costs', document.getElementById('output_costs'), autocomplete_costs);
+var hot_extra_information = make_hot(headers_extra_information, 'extra_information', document.getElementById('output_extra_information'), autocomplete_extra_information);
+
 
 var LOCKS=0;
 
@@ -187,10 +192,11 @@ var save_contents = function(_table, label){
 };
 
 $('.submit_sheet').click(function(){
-	LOCKS += 1;		
+	LOCKS += 1;
 	save_contents(hot_production, 'production');
 	save_contents(hot_reserves, 'reserves');
 	save_contents(hot_costs, 'costs');
+	save_contents(hot_extra_information, 'extra_information');
 	LOCKS -= 1;
 });
 

@@ -20,7 +20,8 @@ from django.contrib.auth.decorators import login_required
 MODELCLASSES = {
     'production': models.Production,
     'reserves': models.Reserve,
-    'costs': models.Cost}
+    'costs': models.Cost,
+    'extra_information': models.ExtraInformation}
 
 @login_required()
 def dataindex(request):
@@ -65,30 +66,36 @@ def process_csv(csvfile, klass):
 
 
 def add_row(line, klass, standard_cols):
-        modelclass = MODELCLASSES[klass]
-        if klass in ('production', 'reserves', 'costs'):
-            project, created = models.Project.objects.get_or_create(
-                project_name = line.pop('project'), defaults = {'type': 'project'},
-                )
+        if klass in MODELCLASSES.keys():
+            modelclass = MODELCLASSES[klass]
+
+            if 'project' in line:
+                project, created = models.Project.objects.get_or_create(
+                    project_name = line.pop('project'),
+                    defaults = {'type': 'project'},)
+                line['project'] = project
+
             try:
                 rawdate = line.pop('date')
-                date = ApproximateDateFormField().clean(rawdate)
-            except ValueError:
-                messages.add_message(request, messages.ERROR,
-                                     'could not make sense of date %s' % rawdate)
+                line['date'] = ApproximateDateFormField().clean(rawdate)
+                
+            except (ValueError,   # badly-formatted date
+                    KeyError):    # no date
+                print(
+                    'could not make sense of date')
                 date = None
-            if klass in ('production', 'reserves'):
-                company, created = models.Company.objects.get_or_create(
-                    company_name = line.pop('company'))
-                line['company'] = company
+                
+            if klass in ('production', 'reserves', 'extra_information'):
+                if 'company' in line:
+                    company, created = models.Company.objects.get_or_create(
+                        company_name = line.pop('company'))
+                    line['company'] = company
             extra_data = {}
             for k in line.keys():
                 if k not in standard_cols:
                     extra_data[k] = line.pop(k)
                     
             newrow = modelclass(
-                project = project,
-                date=date,
                 extra_data = extra_data,
                 **line)
             newrow.save()
@@ -259,24 +266,20 @@ def import_manual(request):
 
     autocomplete_companies = [x.company_name for x in models.Company.objects.all()]
     autocomplete_projects = [x.project_name for x in models.Project.objects.all()]
-    json_prod, autocomplete_prod = build_empty_table_json('production')
-    json_reserves, autocomplete_reserves = build_empty_table_json('reserves')
-    json_costs, autocomplete_costs = build_empty_table_json('costs')
 
+    
     templatedata = {
-        #'formset': formset,
-        # output table 
-        'headers_production': json_prod,
-        'headers_reserves': json_reserves,
-        'headers_costs': json_costs,
-        'autocomplete_production': autocomplete_prod,
-        'autocomplete_reserves': autocomplete_reserves,
-        'autocomplete_costs': autocomplete_costs,
-        
+        # output table         
         'autocomplete_projects': json.dumps(autocomplete_projects),
         'autocomplete_companies': json.dumps(autocomplete_companies),
-        
-                                                   }
+    }
+
+    for tablename in ('production', 'reserves', 'costs', 'extra_information'):
+        jsondata, autocomplete = build_empty_table_json(tablename)
+        templatedata['headers_%s' % tablename] = jsondata
+        templatedata['autocomplete_%s' % tablename] = autocomplete
+
+    
     if edata:
         templatedata['edata_json'] = json.dumps(edata.data)
         templatedata['edata_obj'] = edata

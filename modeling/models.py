@@ -179,6 +179,21 @@ class Production(models.Model):
     class Meta:
         ordering = ['-date']
 
+class ExtraInformation(models.Model):
+    '''
+    Holder for unstructured information gathered during the modeling
+    process
+    '''
+    project = models.ForeignKey(Project, blank=True, null=True)
+    company = models.ForeignKey(Company, blank=True, null=True)
+    label = models.CharField(max_length=100, blank=True,null=True)
+
+
+
+    source = models.ForeignKey(Document, blank=True, null=True)
+    extra_data = models.JSONField(null=True,blank=True)
+
+    
 class Task(models.Model):
     source = models.ForeignKey(Document)
     status = models.CharField(max_length=12,
