@@ -19,8 +19,8 @@ from django.contrib.auth.decorators import login_required
 
 MODELCLASSES = {
     'production': models.Production,
-    'reserve': models.Reserve,
-    'cost': models.Cost}
+    'reserves': models.Reserve,
+    'costs': models.Cost}
 
 @login_required()
 def dataindex(request):
@@ -66,7 +66,7 @@ def process_csv(csvfile, klass):
 
 def add_row(line, klass):        
         modelclass = MODELCLASSES[klass]
-        if klass in ('production', 'reserve', 'cost'):
+        if klass in ('production', 'reserves', 'costs'):
             project, created = models.Project.objects.get_or_create(
                 project_name = line.pop('project'), defaults = {'type': 'project'},
                 )
@@ -78,7 +78,7 @@ def add_row(line, klass):
                                      'could not make sense of date %s' % rawdate)
                 date = None
             #date = dateutil.parser.parse(line.pop('date')).strftime('%Y-%m-%d')
-            if klass in ('production', 'reserve'):
+            if klass in ('production', 'reserves'):
                 company, created = models.Company.objects.get_or_create(
                     company_name = line.pop('company'))
                 line['company'] = company
@@ -204,6 +204,26 @@ def import_pdf(request):
             'form': form,
         })
 
+def build_empty_table_json(modelname):
+    klass = MODELCLASSES.get(modelname, models.Production)
+    modelform = make_modelform(klass)
+    columns = [x.title() for x in modelform.base_fields.keys()]
+    tabledata = [columns]
+    for i in range(5):
+        tabledata.append([''] * len(columns))
+
+    # autocomplete for all the choice fields
+    # (using the django forms infrastructure for some preprocessing
+    autocomplete_fields = dict((x,list(z[0] for z in y.choices))
+                               for (x,y) in modelform.base_fields.items()
+                               if hasattr(y, 'choices')
+                               and x not in (
+                                   'company', 'project', #handled separately
+                                   'source_document', #not yet implemented
+                               ))
+
+    return json.dumps(tabledata), json.dumps(autocomplete_fields)
+
 
 @login_required()
 def import_manual(request):
@@ -220,34 +240,28 @@ def import_manual(request):
 
     # Output table
     modelname = request.GET.get('type', 'production')
-    klass = MODELCLASSES.get(modelname, models.Production)
-    modelform = make_modelform(klass)
-    columns = [x.title() for x in modelform.base_fields.keys()]
 
-    # autocomplete for all the choice fields
-    # (using the django forms infrastructure for some preprocessing
-    autocomplete_fields = dict((x,list(z[0] for z in y.choices))
-                               for (x,y) in modelform.base_fields.items()
-                               if hasattr(y, 'choices')
-                               and x not in (
-                                   'company', 'project', #handled separately
-                                   'source_document', #not yet implemented
-                               ))
-                                
-    tabledata = [columns]
+    
+
     autocomplete_companies = [x.company_name for x in models.Company.objects.all()]
     autocomplete_projects = [x.project_name for x in models.Project.objects.all()]
-    for i in range(5):
-        tabledata.append([''] * len(columns))
-    #formset = formset_factory(make_modelform(klass), extra=10)
+    json_prod, autocomplete_prod = build_empty_table_json('production')
+    json_reserves, autocomplete_reserves = build_empty_table_json('reserves')
+    json_costs, autocomplete_costs = build_empty_table_json('costs')
 
     templatedata = {
         #'formset': formset,
         # output table 
-        'tabledata': json.dumps(tabledata),
+        'headers_production': json_prod,
+        'headers_reserves': json_reserves,
+        'headers_costs': json_costs,
+        'autocomplete_production': autocomplete_prod,
+        'autocomplete_reserves': autocomplete_reserves,
+        'autocomplete_costs': autocomplete_costs,
+        
         'autocomplete_projects': json.dumps(autocomplete_projects),
         'autocomplete_companies': json.dumps(autocomplete_companies),
-        'autocomplete_otherfields': json.dumps(autocomplete_fields),
+        
                                                    }
     if edata:
         templatedata['edata_json'] = json.dumps(edata.data)
@@ -290,7 +304,7 @@ def import_json(request):
     if request.method == 'POST':
         tabledata = json.loads(request.POST['tabledata'])
         metadata = json.loads(request.POST['metadata'])
-        klass = 'production' #XXX writme!
+        klass = metadata['type']
         cols = [x.lower() for x in tabledata[0]]
 
         for row in tabledata[1:]:
@@ -304,4 +318,4 @@ def import_json(request):
         mark_data_processed(metadata)
     else:
         print('not even a post')
-    return HttpResponseRedirect('/review/queue') # redirect to the form
+    return HttpResponseRedirect('/data/add/queue') # should be just an empty page

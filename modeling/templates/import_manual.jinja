@@ -1,7 +1,6 @@
 {% extends "base.jinja" %}
 
 {% block head_content %}
-<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
 <script src="/static/bower_components/handsontable/dist/handsontable.full.js"></script>
 <link rel="stylesheet" media="screen" href="/static/bower_components/handsontable/dist/handsontable.full.css">
 {% endblock %}
@@ -22,18 +21,52 @@
 <div id="extracted_data"></div>
 
 <h3>Add the correct data here</h3>
-<div id="output"></div>
+
 <input type="submit" value="Upload Data" class="submit_sheet"/>
+
+<div id="tabs">
+  <ul>
+      <li><a href="#tabs-1">Production</a></li>
+	  
+    <li><a href="#tabs-2">Reserves</a></li>
+    <li><a href="#tabs-3">Costs</a></li>
+	<li><a href="#tabs-4">Other Data</a></li>
+  </ul>
+  <div id="tabs-1">
+<div id="output_production"></div>
+  </div>
+  <div id="tabs-2">
+	  <div id="output_reserves"></div>
+  </div>
+  <div id="tabs-3">
+	  <div id="output_costs"></div>
+  </div>
+  <div id="tabs-4">
+	  [Not implemented Yet]
+  </div>
+</div>
+
+
 <script>
+
+$(document).ready(function(){
+	$('#tabs').tabs();
+	})
 
 // extracted data
 var edata = {{ edata_json | safe }};
 
-var data = {{ tabledata|safe }};
+var headers_production = {{ headers_production|safe }};
+var headers_reserves = {{ headers_reserves|safe }};
+var headers_costs = {{ headers_costs|safe }};
+
+var autocomplete_production = {{ autocomplete_production | safe }};
+var autocomplete_reserves = {{ autocomplete_reserves | safe }};
+var autocomplete_costs = {{ autocomplete_costs | safe }};
 
 var autocomplete_companies = {{ autocomplete_companies | safe }};
 var autocomplete_projects = {{ autocomplete_projects | safe }};
-var autocomplete_otherfields = {{ autocomplete_otherfields | safe }};
+
 
 
 var render_firstrow = function(instance,td,row,col,prop,value,cellProperties){
@@ -48,70 +81,80 @@ var ed_hot = new Handsontable(document.getElementById('extracted_data'), {
     rowHeaders: true,
     colHeaders: true});
 
-var hot = new Handsontable(document.getElementById('output'), {
-  data: data,
-  minSpareRows: 10,
-  beforeChange: function(changes, source){
-	  // convert number-strings like "42,000" into numbers
-	  // on numeric columns only
-	  
-      for(i in changes){
-		  change = changes[i] // [row,column, 'before', 'after']		  
-		  if(this.getCellMeta(change[0], change[1])['type'] == 'numeric'){
-			  // numeral.js turns non-numeric input into 0
-			  // so we turn 0s back into the original string
-			  // (which just means a pointless round-trip if the input
-			  // really is 0)
-			  change[3] = numeral(change[3]).value() || change[3];
-			  }
-      }
-  },
-	
-  rowHeaders: true,
-  colHeaders: true,
-    contextMenu: true,
-    cells: function(row, col, prop){
-	var cellProperties = {};
-	if(row==0){
-	    cellProperties.renderer = render_firstrow;
-	    cellProperties.readOnly = true;
-	}
-	else if(col==0){
-	    cellProperties.type = 'autocomplete';
-	    cellProperties.source = autocomplete_projects;
-	    cellProperties.strict = false;
-	}
-	else if(col==1){
-	    cellProperties.type = 'autocomplete';
-	    cellProperties.source = autocomplete_companies;
-	    cellProperties.strict = false;
-	}
-	else{
-	    header = data[0][col].toLowerCase();
-	    if(autocomplete_otherfields[header]){
-		cellProperties.type = 'autocomplete';
-		cellProperties.source = autocomplete_otherfields[header];
-		cellProperties.strict = false;
+var make_hot = function(data, label, element, autocomplete){
+	var hot = new Handsontable(element, {
+	  data: data,
+	  minSpareRows: 10,
+	  beforeChange: function(changes, source){
+		  // convert number-strings like "42,000" into numbers
+		  // on numeric columns only
 
-	    }
-	    numeric_fields = ['level',];
-	    if(numeric_fields.indexOf(header) > -1){
-		cellProperties.type = 'numeric';
-	    }
-	    
+		  for(i in changes){
+			  change = changes[i] // [row,column, 'before', 'after']		  
+			  if(this.getCellMeta(change[0], change[1])['type'] == 'numeric'){
+				  // numeral.js turns non-numeric input into 0
+				  // so we turn 0s back into the original string
+				  // (which just means a pointless round-trip if the input
+				  // really is 0)
+				  change[3] = numeral(change[3]).value() || change[3];
+				  }
+		  }
+	  },
+
+	  rowHeaders: true,
+	  colHeaders: true,
+		contextMenu: true,
+		cells: function(row, col, prop){
+		var cellProperties = {};
+		if(row==0){
+			cellProperties.renderer = render_firstrow;
+			cellProperties.readOnly = true;
+		}
+		else if(col==0){
+			cellProperties.type = 'autocomplete';
+			cellProperties.source = autocomplete_projects;
+			cellProperties.strict = false;
+		}
+		else if(col==1){
+			cellProperties.type = 'autocomplete';
+			cellProperties.source = autocomplete_companies;
+			cellProperties.strict = false;
+		}
+		else{
+			header = data[0][col].toLowerCase();
+			if(autocomplete[header]){
+			cellProperties.type = 'autocomplete';
+			cellProperties.source = autocomplete[header];
+			cellProperties.strict = false;
+
+			}
+			numeric_fields = ['level',];
+			if(numeric_fields.indexOf(header) > -1){
+			cellProperties.type = 'numeric';
+			}
+
+		}
+
+		return cellProperties
+		}
+
+	});
+	return hot;
 	}
+var hot_production = make_hot(headers_production, 'production', document.getElementById('output_production'), autocomplete_production);
+var hot_reserves = make_hot(headers_reserves, 'reserves', document.getElementById('output_reserves'), autocomplete_reserves);
+var hot_costs = make_hot(headers_costs, 'costs', document.getElementById('output_costs'), autocomplete_costs);
 
-	return cellProperties
-    }
-	    
-});
+var LOCKS=0;
 
 
-var save_contents = function(){
+
+var save_contents = function(_table, label){
+	LOCKS += 1;
     console.log('save_contents');
     data_for_post = {
 	    'metadata': JSON.stringify(
-		{'type': 'production',
+		{'type': label,
 
 		 {% if edata_obj %}
 		 'edata_id': {{edata_obj.id}},
@@ -119,20 +162,31 @@ var save_contents = function(){
 
 		 
 		}),
-	    'tabledata': JSON.stringify(hot.getData()),
+	    'tabledata': JSON.stringify(_table.getData()),
 	    'csrfmiddlewaretoken': '{{csrf_token}}',
-	},
+	};
+	
 
     $.ajax({
 	'url': '/data/add/json/',
 	'type': 'POST',
 	'data': data_for_post,
 	'success': function(json){
-	    alert('the data has been successfully added to the DB');},
-    });
-    data = hot.getData();
-}
-$('.submit_sheet').click(save_contents);
+		LOCKS -= 1;
+		if(LOCKS == 0){
+			window.location.href="/data/add/queue";
+			}
+		}
+    });    
+};
+
+$('.submit_sheet').click(function(){
+	LOCKS += 1;		
+	save_contents(hot_production, 'production');
+	save_contents(hot_reserves, 'reserves');
+	save_contents(hot_costs, 'costs');
+	LOCKS -= 1;
+});
 
 
 </script>
