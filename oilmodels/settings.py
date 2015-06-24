@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'modeling',
     'hulk',
     'ooapi',
+    'auditlog',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -56,6 +57,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 )
 
 ROOT_URLCONF = 'oilmodels.urls'

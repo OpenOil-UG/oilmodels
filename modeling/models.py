@@ -6,6 +6,7 @@ from django_date_extensions.fields import ApproximateDateField
 from hulk.models import Document, Company, Project
 import moneyed
 
+from auditlog.registry import auditlog
 
 
 
@@ -227,3 +228,8 @@ class ExtractedData(models.Model):
     # data should be a list of
     document = models.ForeignKey(Document, blank=True,null=True)
     reviewed = models.BooleanField(default=False)
+
+
+# auditlog setup
+for table in (InformationType, DataSource, Reserve, Production, Cost, ExtractedData, ExtraInformation, Company, Project):
+    auditlog.register(table)

@@ -16,3 +16,4 @@ pycountry
 openpyxl
 pypdf
 pdfsplit
+django-auditlog
