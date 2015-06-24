@@ -1,6 +1,7 @@
 from django_pg import models
 from datetime import datetime
 from django_countries.fields import CountryField
+from django_date_extensions.fields import ApproximateDateField
 import uuid
 
 def random_id(*args, **kwargs):
@@ -46,7 +47,36 @@ class Company(models.Model):
         return self.company_name or '<untitled>'
 
 
+class Document(models.Model):
+    doc_id = models.CharField(primary_key=True, max_length=200, default=random_id)
+    description  = models.CharField(blank=True,null=True,max_length=300)
+    source_url = models.CharField(max_length=200, default='') # original source
+    mirror_url = models.CharField(max_length=200, default='') #
 
+    publish_date = ApproximateDateField(blank=True,null=True,
+                               help_text = "When the document was published")
+
+    import_date = models.DateTimeField(auto_now_add=True)
+    
+    # source is left here to avoid breaking ResourceHulk,
+    # but is no longer really in use
+    source = models.ForeignKey('SourceInfo', null=True,blank=True)
+
+
+    metadata = models.JSONField(null=True,blank=True)
+    # metadata we might be interested in:
+    #  file type
+    #  size    
+    
+    class Meta:
+        db_table = 'document_table'
+
+    def __str__(self):
+        return self.source_url or '<untitled>'
+
+
+
+    
 class SourceInfo(models.Model):
     '''
     Contains source information
@@ -130,21 +160,6 @@ class Contract(models.Model):
         return self.contract_id or '<untitled>'
 
 
-class Document(models.Model):
-    doc_id = models.CharField(primary_key=True, max_length=200, default=random_id)
-    description  = models.CharField(blank=True,null=True,max_length=300)
-    host_url = models.CharField(max_length=200, default='')
-    source_url = models.CharField(max_length=200, default='')
-    source = models.ForeignKey('SourceInfo', null=True,blank=True)
-    metadata = models.JSONField(null=True,blank=True)
-    
-    class Meta:
-        db_table = 'document_table'
-
-    def __str__(self):
-        return self.host_url or '<untitled>'
-
-
 class Statement(models.Model):
     statement_id = models.CharField(primary_key=True, max_length=200, default=random_id)
     doc = models.ForeignKey(Document,blank=True,null=True,default=None)
@@ -166,29 +181,3 @@ class Statement(models.Model):
 
     def __str__(self):
         return self.statement_content or '<untitled>'
-
-
-
-
-'''
-class Commodity(models.Model):
-    commodity_id = models.CharField(primary_key=True, max_length=200, default=random_id)
-    commodity_name = models.CharField(max_length=200)
-
-    class Meta:
-        db_table = 'commodity_table'
-
-    def __str__(self):
-        return self.commodity_name or '<untitled>'
-
-
-class CompanyAlias(models.Model):
-    company_alias = models.CharField(primary_key=True, max_length=200, default=random_id)
-    company_id = models.CharField(max_length=200)
-
-    class Meta:
-        db_table = 'company_alias_table'
-
-    def __str__(self):
-        return self.company_alias or '<untitled>'
-'''

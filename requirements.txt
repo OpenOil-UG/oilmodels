@@ -17,3 +17,4 @@ openpyxl
 pypdf
 pdfsplit
 django-auditlog
+django-datetime-widget

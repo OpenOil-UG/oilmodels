@@ -1,13 +1,13 @@
 from django.contrib import admin
 from hulk.models import (
-    Company, Project, Statement,
-    Search, SearchResult, SourceInfo)
+    Company, Project, Document)
+# Statement,
+#    Search, SearchResult, SourceInfo)
 #    Company, Concession, Document, Statement, Project,
 #    Commodity, ConcessionAlias, CompanyAlias,
 #    Search,SearchResult, SourceInfo)
 
-for table in (Company, Project, Statement,
-              Search, SearchResult, SourceInfo):
+for table in (Company, Project, Document):
 #              Concession, Document,Statement,Project,
 #              Commodity, ConcessionAlias, CompanyAlias,
 #              Search, SearchResult, SourceInfo):
