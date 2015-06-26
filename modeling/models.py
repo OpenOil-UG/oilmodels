@@ -10,6 +10,7 @@ from auditlog.registry import auditlog
 
 
 
+# commodities are disabled, since there were too many of them
 COMMODITIES = (
         ('gas', 'Gas'),
         ('oil', 'Oil, grade unspecified'),
@@ -18,13 +19,16 @@ COMMODITIES = (
         )
 
 CONFIDENCE_MEASURES = [(x,x) for x in [
-            'Unknown',
-            '1P',
-            '2P',
-            '3P',
-            '1C',
-            '2C',
-            '3C',
+    'Unknown',
+    '1P',
+    '2P',
+    '3P',
+    '1C',
+    '2C',
+    '3C',
+    'Proven and probable',
+    'Mineral Resource',
+    'Inferred',
             ]]
 
 FIELD_STATUSES = (
@@ -41,9 +45,16 @@ UNITS = (
     ('mboe', 'Million barels oil equivalent'),
     ('tdf', 'Thousand Cubic Feet (mcf/mscf)'),
     ('m3', 'Cubic Metres'),
-            )
+    ('ounces', 'Ounces'),
+    ('troy ounces', 'Troy Ounces'),
+    ('pounds', 'Pounds'),
+    ('kg', 'Kilgrams'),
+    ('tonnes', 'Tonnes (metric)'),
+    ('million carats', 'Million carats'),
+)
 
 REPORTING_LEVELS = (
+    ('concession-license', 'Concession/License'),
     ('well', 'Well'),
     ('field', 'Field'),
     ('project', 'Project'),
@@ -89,6 +100,22 @@ class InformationType(models.Model):
     def __str__(self):
         return self.name
 
+class ExtractedData(models.Model):
+    '''
+    metadata should contain:
+     source document url
+     page number
+     date
+     reviewed
+          
+    '''
+    metadata = models.JSONField(null=True,blank=True)    
+    data = models.JSONField(null=True,blank=True)
+    # data should be a list of
+    document = models.ForeignKey(Document, blank=True,null=True)
+    reviewed = models.BooleanField(default=False)
+
+    
 class Cost(models.Model):
     project = models.ForeignKey(Project)
     # XXX does a key to Company make sense here??
@@ -108,6 +135,9 @@ class Cost(models.Model):
         choices=TIME_PERIODS + (('barrel', 'barrel'),))
 
     extra_data = models.JSONField(null=True,blank=True)
+
+    moderated = models.BooleanField(default=False)
+    extracted_data = models.ForeignKey(ExtractedData, blank=True, null=True)
     
 class Reserve(models.Model):
 
@@ -116,7 +146,9 @@ class Reserve(models.Model):
     interest = models.FloatField(default=100, verbose_name = "Interest of the company in this project (%)")
     date = ApproximateDateField(blank=True,null=True,
                                help_text = "year statement applies to, if specified, otherwise publication year of the source document")
-    commodity = models.CharField(max_length=100, choices = COMMODITIES)
+    commodity = models.CharField(max_length=100,
+    #                             choices = COMMODITIES
+    )
     confidence = models.CharField(
         max_length=20,
         choices = CONFIDENCE_MEASURES,
@@ -136,6 +168,9 @@ class Reserve(models.Model):
 
     extra_data = models.JSONField(null=True,blank=True)
 
+    moderated = models.BooleanField(default=False)
+    extracted_data = models.ForeignKey(ExtractedData, blank=True, null=True)
+    
     def __str__(self):
         if self.project and self.project.project_name:
             return '%s: %s estimate' % (self.project.project_name, self.date)
@@ -154,7 +189,8 @@ class Production(models.Model):
     company = models.ForeignKey(Company, blank=True, null=True)
     date = ApproximateDateField(blank=True,null=True)
     commodity = models.CharField(max_length=100,
-                                 choices=COMMODITIES)
+    #                             choices=COMMODITIES,
+    )
     actual_predicted = models.CharField(max_length=10,
                                         choices=(
                                             ('actual', 'Actual'),
@@ -177,6 +213,9 @@ class Production(models.Model):
 
     extra_data = models.JSONField(null=True,blank=True)
 
+    moderated = models.BooleanField(default=False)
+    extracted_data = models.ForeignKey(ExtractedData, blank=True, null=True)
+    
     class Meta:
         ordering = ['-date']
 
@@ -194,6 +233,8 @@ class ExtraInformation(models.Model):
     source = models.ForeignKey(Document, blank=True, null=True)
     extra_data = models.JSONField(null=True,blank=True)
 
+    moderated = models.BooleanField(default=False)
+    extracted_data = models.ForeignKey(ExtractedData, blank=True, null=True)
     
 class Task(models.Model):
     source = models.ForeignKey(Document)
@@ -214,20 +255,6 @@ class TaskGroup(models.Model):
     description = models.CharField
     data = models.JSONField(null=True,blank=True)
     
-class ExtractedData(models.Model):
-    '''
-    metadata should contain:
-     source document url
-     page number
-     date
-     reviewed
-          
-    '''
-    metadata = models.JSONField(null=True,blank=True)    
-    data = models.JSONField(null=True,blank=True)
-    # data should be a list of
-    document = models.ForeignKey(Document, blank=True,null=True)
-    reviewed = models.BooleanField(default=False)
 
 
 # auditlog setup

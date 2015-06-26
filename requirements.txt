@@ -14,7 +14,7 @@ py-moneyed
 django-money
 pycountry
 openpyxl
-pypdf
-pdfsplit
+PyPDF2
+#pdfsplit
 django-auditlog
 django-datetime-widget

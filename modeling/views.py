@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django_date_extensions.fields import ApproximateDateFormField
-from datetimewidget.widgets import DateTimeWidget
+#from datetimewidget.widgets import DateTimeWidget
 from modeling import models
 from modeling import pdftables
 
@@ -135,12 +135,17 @@ def make_modelform(klass):
 class ImportPDFForm(forms.Form):
     doc_description = forms.CharField(label="description of the source", max_length=100)
     doc_url = forms.URLField(label="where is the PDF?")
-    publish_date = forms.DateField(
-        required=False,
-        label="When was the document published",
-        widget=DateTimeWidget()),
+    #publish_date = forms.CharField(
+    #    required=False,
+    #    label="When was the document published",
+    #    widget=DateTimeWidget()
+    #),
     pagenum = forms.CharField(label="what pages of the PDF do you want data from?")
 
+    publish_date= forms.DateField(
+        label="When was the document published?",
+        widget = forms.DateInput(),
+    )
 
     # set up the greyed-out text
     placeholders = {
@@ -161,7 +166,7 @@ def process_new_document(form):
     doc = models.Document(
         source_url = form.cleaned_data['doc_url'],
         description = form.cleaned_data['doc_description'],
-        publish_date= form.cleaned_data['publish_date'],
+        publish_date= form.cleaned_data['publish_date'].strftime('%F'),
     )
     doc.save()
 

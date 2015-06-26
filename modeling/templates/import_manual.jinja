@@ -144,7 +144,9 @@ var make_hot = function(data, label, element, autocomplete){
 			}
 			numeric_fields = ['level',];
 			if(numeric_fields.indexOf(header) > -1){
-			cellProperties.type = 'numeric';
+			    cellProperties.type = 'numeric';
+			    cellProperties.format = '0,0.00';
+
 			}
 
 		}

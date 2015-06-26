@@ -1,7 +1,6 @@
 {% extends "base.jinja" %}
 
 {% block head_content %}
-<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
 <script src="/static/bower_components/handsontable/dist/handsontable.full.js"></script>
 <link rel="stylesheet" media="screen" href="/static/bower_components/handsontable/dist/handsontable.full.css">
 {% endblock %}
@@ -43,5 +42,12 @@ Upload a PDF document, and indicate a page you wish to add into the database. Th
 </table>
 <input type="submit"/>
 </form>
+<script>
+$(document).ready(function(){
+  $('#id_publish_date').datepicker({
+      changeMonth: true,
+      changeYear: true});
+  });
+</script>
 
 {% endblock %}

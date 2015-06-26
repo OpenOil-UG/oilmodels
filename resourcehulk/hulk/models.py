@@ -22,9 +22,6 @@ class Project(models.Model):
     source = models.ForeignKey('SourceInfo', null=True,blank=True)
     parent = models.ForeignKey('Project', null=True, blank=True, related_name="subprojects")
 
-    class Meta:
-        db_table = 'project_table'
-
 
     def __str__(self):
         return self.project_name or '<untitled>'
@@ -40,7 +37,6 @@ class Company(models.Model):
     source=models.ForeignKey('SourceInfo', blank=True,null=True, related_name='companies')
 
     class Meta:
-        db_table = 'company_table'
         ordering = ['company_name',]
 
     def __str__(self):
@@ -68,9 +64,6 @@ class Document(models.Model):
     #  file type
     #  size    
     
-    class Meta:
-        db_table = 'document_table'
-
     def __str__(self):
         return self.source_url or '<untitled>'
 
@@ -119,8 +112,6 @@ class ConcessionAlias(models.Model):
     concession_alias = models.CharField(primary_key=True, max_length=200)
     concession_id = models.CharField(max_length=200)
 
-    class Meta:
-        db_table = 'concession_alias_table'
 
     def __str__(self):
         return self.concession_alias or '<untitled>'
@@ -133,8 +124,6 @@ class Concession(models.Model):
     country = models.CharField(max_length=200)
     source = models.ForeignKey('SourceInfo', null=True,blank=True)
 
-    class Meta:
-        db_table = 'concession_table'
 
     def __str__(self):
         return self.concession_name or '<untitled>'
@@ -153,8 +142,6 @@ class Contract(models.Model):
     sign_year = models.CharField(max_length=200)
     source = models.ForeignKey('SourceInfo', null=True,blank=True)
 
-    class Meta:
-        db_table = 'contract_table'
 
     def __str__(self):
         return self.contract_id or '<untitled>'
@@ -166,18 +153,16 @@ class Statement(models.Model):
     statement_content = models.CharField(max_length=200)
     definitive = models.BooleanField(default=False)
 
-    projects = models.ManyToManyField('Project', db_table='project_link_table', blank=True)
-    companies = models.ManyToManyField('Company', db_table='company_link_table', blank=True)
-    concessions = models.ManyToManyField('Concession', db_table='concession_link_table',
+    projects = models.ManyToManyField('Project', blank=True)
+    companies = models.ManyToManyField('Company', blank=True)
+    concessions = models.ManyToManyField('Concession',
                                          blank=True)
-    contracts = models.ManyToManyField('Contract', db_table='contract_link_table',
+    contracts = models.ManyToManyField('Contract', 
                                       blank=True)
 
     source = models.ForeignKey('SourceInfo', null=True,blank=True)
 
 
-    class Meta:
-        db_table = 'statement_table'
 
     def __str__(self):
         return self.statement_content or '<untitled>'
