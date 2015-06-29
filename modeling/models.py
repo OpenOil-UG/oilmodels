@@ -68,7 +68,7 @@ TIME_PERIODS = (
     ('month', 'month'),
     ('year', 'year'))
 
-CURRENCIES = sorted((k, v.name) for k,v in moneyed.CURRENCIES.items())
+CURRENCIES = sorted((k, v.name) for k,v in list(moneyed.CURRENCIES.items()))
 
 
 class DataSource(models.Model):

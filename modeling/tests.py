@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from pdftables import interpret_range
+from .pdftables import interpret_range
 
 # Create your tests here.
 

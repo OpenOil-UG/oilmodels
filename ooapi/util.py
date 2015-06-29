@@ -158,12 +158,12 @@ def fix_furtherinfo():
     for row in models.Concession.objects.all():
         d = {}
         parts = reversed([x.strip() for x in row.further_info.split(',')])
-        remainder = u''
+        remainder = ''
         for part in parts:
             if ':' in part:
                 k,v = part.split(':', 1)
                 d[k] = (v + remainder).strip()
-                remainder = u''
+                remainder = ''
             else: #this is something we got from not escaping commas
                 remainder = remainder +', ' + part
         row.details = d
@@ -182,7 +182,7 @@ def keycounts():
     d = Counter()
     countries = defaultdict(set)
     for row in models.Concession.objects.all():
-        for k in row.details.keys():
+        for k in list(row.details.keys()):
             d[k] += 1
             countries[k].add(row.country.code)
     for(label,count) in d.most_common(100):
