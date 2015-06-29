@@ -1,0 +1,38 @@
+<h3>Field Descriptions</h3>
+
+<b>Production</b>
+
+<ul>
+<li><b>Project</b>: A project is any grouping of operations within the extractives industry. It could represent a single well, or all oil activity within a country.
+
+If a project with this name exists in the <a href="http://46.4.51.137:8000/admin/hulk/project/">Project table</a>, a link will be created to that project. Otherwise, a new entry in that table will be created, with no information other than the name.<br/>
+If you wish to add more information about a project, please do so through the <a href="http://46.4.51.137:8000/admin/hulk/project/">standard Django admin interface</a>.
+</li>
+<li><b>Company</b>: As with Project, this references another table, where an entry will be created if there is not already a company listed with that name </li>
+<li><b>Date</b>: The period to which this information applies. [i.e. <i>not</i> the publication date of the document]. This can be entered as an entire year ("2014"), a month ("Oct 2006") or a "day ("2006-10-25"). You can find a full list of possible formats <a href="https://github.com/dracos/django-date-extensions/blob/master/django_date_extensions/settings.py">here</a></li>
+<li><b>Commodity</b>: Self-explanatory</li>
+<li><b>Actual/Predicted</b>: Is this a report of past production, or a prediction for the future</li>
+<li><b>Confidence</b>: <i>Applies only to predicted values</i>/. If this is  a prediction, what confidence measure has been attached to it</li>
+<li><b>Level</b>: The amount being produced. The figure here should be expressed in the <i>unit</i> specified in the next column. E.g. if production is 5,000,000 barrels and you have chosen <i>million barrels</i> as the unit, the level should be <i>5</i>, not <i>5,000,000</i></li>
+<li><b>Unit</b>: The units in which production is stated. This should generally match the units used in the source document.</li>
+<li><b>Per</b>: The time period within which this production occured</li>
+<li><b>[Additional Columns]</b>: Please add any additional data in the form of further columns. This will be stored in unstructured format in the database</li>
+</ul>
+
+<b>Reserves</b>
+
+<ul>
+<li><b>Project, Company, Date, Commodity</b>: </li>
+<li><b>Interest</b>: What percentage of this project is owned by the company. In numbers representing percentage -- i.e. 100 for full ownership</li>
+<li><b>Status</b>: Developed or undeveloped</li>
+</ul>
+
+<b>Costs</b>
+
+<ul>
+<li><b>Project, Actual/Predicted</b>: As for production</li>
+<li><b>Description</b>: What the cost was</li>
+<li><b>Amount</b>: </li>
+<li><b>Currency</b>: </li>
+<li><b>Per</b>: What this cost applies to. Can refer to a time period ('year') or a production quantity ('barrel')</li>
+</ul>

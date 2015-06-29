@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django import forms
+from django.core import exceptions
 from django.contrib import messages
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
@@ -66,8 +67,8 @@ def process_csv(csvfile, klass):
         add_row(line,klass)
 
 
-def add_row(line, klass, standard_cols):
-        if klass in MODELCLASSES.keys():
+def add_row(line, klass, standard_cols, edata):
+        if klass in list(MODELCLASSES.keys()):
             modelclass = MODELCLASSES[klass]
 
             if 'project' in line:
@@ -92,12 +93,13 @@ def add_row(line, klass, standard_cols):
                         company_name = line.pop('company'))
                     line['company'] = company
             extra_data = {}
-            for k in line.keys():
+            for k in list(line.keys()):
                 if k not in standard_cols:
                     extra_data[k] = line.pop(k)
                     
             newrow = modelclass(
                 extra_data = extra_data,
+                extracted_data = edata,
                 **line)
             newrow.save()
             # XXX add sourcing info here
@@ -153,7 +155,7 @@ class ImportPDFForm(forms.Form):
         doc_url: 'http://example.com/dir/file.pdf',
         pagenum: '1,3,4-8',
     }
-    for (k,v) in placeholders.items():
+    for (k,v) in list(placeholders.items()):
         k.widget = forms.TextInput(
             attrs = {'placeholder': v,
                      'size': "100"})
@@ -222,7 +224,7 @@ def import_pdf(request):
 def get_columns(modelname):
     klass = MODELCLASSES.get(modelname, models.Production)
     modelform = make_modelform(klass)
-    columns = [x.title() for x in modelform.base_fields.keys()]
+    columns = [x.title() for x in list(modelform.base_fields.keys())]
     columns.pop(columns.index('Extra_Data'))
     return columns
     
@@ -240,7 +242,7 @@ def build_empty_table_json(modelname):
     # autocomplete for all the choice fields
     # (using the django forms infrastructure for some preprocessing
     autocomplete_fields = dict((x,list(z[0] for z in y.choices))
-                               for (x,y) in modelform.base_fields.items()
+                               for (x,y) in list(modelform.base_fields.items())
                                if hasattr(y, 'choices')
                                and x not in (
                                    'company', 'project', #handled separately
@@ -327,16 +329,24 @@ def import_json(request):
         tabledata = json.loads(request.POST['tabledata'])
         metadata = json.loads(request.POST['metadata'])
         klass = metadata['type']
+        edata_obj = None
+        if 'edata_id' in metadata:
+            try:
+                edata_obj = models.ExtractedData.objects.get(pk = metadata['edata_id'])
+            except exceptions.ObjectDoesNotExist:
+                pass
+
+        
         cols = [x.lower() for x in tabledata[0] if x]
         standard_cols = [x.lower() for x in get_columns(klass)]
 
         for row in tabledata[1:]:
             if not any(row):
                 break
-            labeled_rows = zip(cols,row)
+            labeled_rows = list(zip(cols,row))
             # treat blank rows as blank -- let the model fill in the defaults
-            rowdata = dict(itertools.ifilter(lambda (x,y): y != "", labeled_rows))
-            add_row(rowdata, klass, standard_cols)
+            rowdata = dict([x_y for x_y in labeled_rows if x_y[1] != ""])
+            add_row(rowdata, klass, standard_cols, edata_obj)
         mark_data_processed(metadata)
     return HttpResponse('OK')
 
