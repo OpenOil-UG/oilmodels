@@ -107,6 +107,7 @@ class ExtractedData(models.Model):
      page number
      date
      reviewed
+     file_type
           
     '''
     metadata = models.JSONField(null=True,blank=True)    

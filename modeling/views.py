@@ -104,9 +104,6 @@ def add_row(line, klass, standard_cols, edata):
             newrow.save()
             # XXX add sourcing info here
 
-def process_table(tabledata, klass):
-    pass
-            
 @login_required()
 def import_csv(request):
     if request.method == 'POST':
@@ -130,7 +127,7 @@ def make_modelform(klass):
     class KlassForm(forms.ModelForm):
         class Meta:
             model = klass
-            exclude = ['source',]
+            exclude = ['source','extracted_data', 'moderated']
     return KlassForm
 
 

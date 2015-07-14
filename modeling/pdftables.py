@@ -62,6 +62,7 @@ def page_to_csv(pdfurl, pagenumber):
 def csv_to_json(csvtext):
     # XXX this unicode hack is mangling some text
     reader = unicode_csv_reader(csvtext.split('\n'))
+    reader = csv.reader(csvtext.split('\n'))
     return json.dumps(
         {'data': list(reader)})
 

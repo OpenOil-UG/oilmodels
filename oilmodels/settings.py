@@ -42,12 +42,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_countries',
     'django_tables2',
+    'django_extensions',
     'auditlog',
     'datetimewidget',
     'modeling',
     'hulk',
     'ooapi',
-
 )
 
 MIDDLEWARE_CLASSES = (

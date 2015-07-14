@@ -7,6 +7,14 @@ import uuid
 def random_id(*args, **kwargs):
     return uuid.uuid4().hex
 
+FILETYPES = (
+        ('pdf', 'PDF'),
+        ('html', 'HTML'),
+        ('xls', 'Excel (xls) spreadsheet'),
+        ('other', 'Other'),
+        )
+
+
 class Project(models.Model):
     project_id = models.CharField(primary_key=True, max_length=200, default=random_id)    
     project_name = models.CharField(max_length=200,null=True,blank=True)
@@ -53,6 +61,11 @@ class Document(models.Model):
                                help_text = "When the document was published")
 
     import_date = models.DateTimeField(auto_now_add=True)
+
+    #filetype = models.CharField(max_length=10,
+    #                                    choices=FILETYPES,
+    #                            blank=True,null=True,default=None)
+                                
     
     # source is left here to avoid breaking ResourceHulk,
     # but is no longer really in use
@@ -66,8 +79,6 @@ class Document(models.Model):
     
     def __str__(self):
         return self.source_url or '<untitled>'
-
-
 
     
 class SourceInfo(models.Model):
