@@ -34,6 +34,13 @@ def new_api_key(request):
     mail_apikey(apikey)
     return HttpResponse('your key has been mailed to you')
 
+@require_api_key
+def check_api_key(request):
+    '''
+    Simply check that an API key is valid
+    '''
+    return JsonResponse({})
+
 
 @require_api_key
 def concession(request, countrycode, identifier):

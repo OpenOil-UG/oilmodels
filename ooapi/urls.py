@@ -9,6 +9,7 @@ v01_urlpatterns = [
     url(r'^concession/search?', views.concessions, name="concessions"),
     url(r'^concession/(?P<countrycode>[^/]*)/(?P<identifier>.*)', views.concession, name="concession"),
     url(r'^apikey/generate/?', views.new_api_key, name="generate_api_key"),
+    url(r'^apikey/check/?', views.check_api_key, name="check_api_key"),
     url(r'^/?', redir_to_docs),
     url(r'^documentation/?', redir_to_docs),
 ]
